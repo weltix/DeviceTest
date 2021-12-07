@@ -25,12 +25,12 @@ import ua.com.ekka.devicetest.su.SuCommandsHelper;
  */
 public class UartWorker {
 
+    Logger logger = Log4jHelper.getLogger(UartWorker.class.getName());
+
     public static final int EVENT_UART_OPEN = 0;
     public static final int EVENT_UART_CLOSED = 1;
     public static final int EVENT_UART_READ = 2;
     public static final int EVENT_UART_ERROR = 3;
-
-    public static String UART_CHANGE_SETTINGS = "uart_change_settings";
 
     public static String[] SERIAL_PORTS;
     public static String[] SERIAL_PORTS_AOSP_DRONE2 = {"/dev/ttySAC1", "/dev/ttySAC2"};
@@ -39,8 +39,8 @@ public class UartWorker {
 
     public static int[] baudrates = {9600, 19200, 38400, 57600, 115200};
 
-    private String openedUartName;
-    private int openedUartBaudrate;
+    private String openedUartName;   // used to keep info about currently opened port (e.g. for logging)
+    private int openedUartBaudrate;  // used to keep info about currently opened port (e.g. for logging)
 
     private Handler mHandler;
     private SerialPort serialPort;
@@ -48,8 +48,7 @@ public class UartWorker {
     private InputStream mInputStream;
     private ReadThread mReadThread;
 
-    Logger logger = Log4jHelper.getLogger(UartWorker.class.getName());
-
+    public static String UART_CHANGE_SETTINGS = "uart_change_settings";
     private Context context;
 
     public UartWorker(Handler handler, Context context) {
@@ -62,33 +61,33 @@ public class UartWorker {
                 break;
             case PRODUCT_RES_PX30:
                 SERIAL_PORTS = SERIAL_PORTS_RES_PX30;
-                SuCommandsHelper.executeCmd("echo 51 > /sys/class/gpio/export", 100);  // create GPIO(51) file for UART1_DTR_PIN_ (/dev/ttyS1)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio51/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 50 > /sys/class/gpio/export", 100);  // create GPIO(50) file for UART1_DSR_PIN_ (/dev/ttyS1)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio50/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 45 > /sys/class/gpio/export", 100);  // create GPIO(45) file for UART3_DTR_PIN_ (/dev/ttyS3)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio45/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 44 > /sys/class/gpio/export", 100);  // create GPIO(44) file for UART3_DSR_PIN_ (/dev/ttyS3)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio44/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 100);  // set GPIO(51)/UART1_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio50/value", 100);  // set GPIO(50)/UART1_DSR_PIN_ to high level
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 100);  // set GPIO(45)/UART3_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio44/value", 100);  // set GPIO(44)/UART3_DSR_PIN_ to high level
+                SuCommandsHelper.executeCmd("echo 51 > /sys/class/gpio/export", 0);  // create GPIO(51) file for UART1_DTR_PIN_ (/dev/ttyS1)
+                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio51/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 50 > /sys/class/gpio/export", 0);  // create GPIO(50) file for UART1_DSR_PIN_ (/dev/ttyS1)
+                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio50/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 45 > /sys/class/gpio/export", 0);  // create GPIO(45) file for UART3_DTR_PIN_ (/dev/ttyS3)
+                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio45/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 44 > /sys/class/gpio/export", 0);  // create GPIO(44) file for UART3_DSR_PIN_ (/dev/ttyS3)
+                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio44/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to high level
+//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio50/value", 0);  // set GPIO(50)/UART1_DSR_PIN_ to high level
+                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to high level
+//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio44/value", 0);  // set GPIO(44)/UART3_DSR_PIN_ to high level
                 break;
             case PRODUCT_RES_RK3399:
                 SERIAL_PORTS = SERIAL_PORTS_RES_RK3399;
-                SuCommandsHelper.executeCmd("echo 83 > /sys/class/gpio/export", 100);  // create GPIO(83) file for UART0_DTR_PIN_ (/dev/ttyS0)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio83/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 82 > /sys/class/gpio/export", 100);  // create GPIO(82) file for UART0_DSR_PIN_ (/dev/ttyS0)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio82/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 4 > /sys/class/gpio/export", 100);  // create GPIO(4) file for UART4_DTR_PIN_ (/dev/ttyS4)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio4/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 90 > /sys/class/gpio/export", 100);  // create GPIO(90) file for UART4_DSR_PIN_ (/dev/ttyS4)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio90/direction", 100);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio83/value", 100);  // set GPIO(83)/UART0_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio82/value", 100);  // set GPIO(82)/UART0_DSR_PIN_ to high level
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio4/value", 100);  // set GPIO(4)/UART4_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio90/value", 100);  // set GPIO(90)/UART4_DSR_PIN_ to high level
+                SuCommandsHelper.executeCmd("echo 83 > /sys/class/gpio/export", 0);  // create GPIO(83) file for UART0_DTR_PIN_ (/dev/ttyS0)
+                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio83/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 82 > /sys/class/gpio/export", 0);  // create GPIO(82) file for UART0_DSR_PIN_ (/dev/ttyS0)
+                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio82/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 4 > /sys/class/gpio/export", 0);  // create GPIO(4) file for UART4_DTR_PIN_ (/dev/ttyS4)
+                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio4/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 90 > /sys/class/gpio/export", 0);  // create GPIO(90) file for UART4_DSR_PIN_ (/dev/ttyS4)
+                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio90/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio83/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to high level
+//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio82/value", 0);  // set GPIO(82)/UART0_DSR_PIN_ to high level
+                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio4/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to high level
+//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio90/value", 0);  // set GPIO(90)/UART4_DSR_PIN_ to high level
                 break;
             default:
                 SERIAL_PORTS = SERIAL_PORTS_AOSP_DRONE2;
@@ -104,14 +103,14 @@ public class UartWorker {
     public void openPort(String uartName, int baudrate) {
         if (android.os.Build.PRODUCT.equals(PRODUCT_RES_PX30)) {
             if (uartName.equals(SERIAL_PORTS_RES_PX30[0]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio51/value", 100);  // set GPIO(51)/UART1_DTR_PIN_ to ON state
+                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to ON state
             else if (uartName.equals(SERIAL_PORTS_RES_PX30[1]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio45/value", 100);  // set GPIO(45)/UART3_DTR_PIN_ to ON state
+                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to ON state
         } else if (android.os.Build.PRODUCT.equals(PRODUCT_RES_RK3399)) {
             if (uartName.equals(SERIAL_PORTS_RES_RK3399[0]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio83/value", 100);  // set GPIO(83)/UART0_DTR_PIN_ to ON state
+                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio83/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to ON state
             else if (uartName.equals(SERIAL_PORTS_RES_RK3399[1]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio4/value", 100);  // set GPIO(4)/UART4_DTR_PIN_ to ON state
+                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio4/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to ON state
         }
 
         try {
@@ -130,10 +129,10 @@ public class UartWorker {
             mReadThread = new ReadThread();
             mReadThread.start();
             logger.warn(String.format("openPort(), %s (%d, 8, N, 1) opened successfully", uartName, baudrate));
-            sendMsgToParent(EVENT_UART_OPEN, new String[]{uartName, String.valueOf(baudrate)}, 0);
+            sendMsgToParent(EVENT_UART_OPEN, 0, new String[]{uartName, String.valueOf(baudrate)});
         } catch (IOException | SecurityException | NullPointerException e) {
             logger.error(String.format("openPort(), error opening %s (%d, 8, N, 1)", uartName, baudrate), e);
-            sendMsgToParent(EVENT_UART_ERROR, new String[]{uartName, String.valueOf(baudrate), "COM port opening"}, 0);
+            sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{uartName, String.valueOf(baudrate), "opening COM port"});
         }
         openedUartName = uartName;
         openedUartBaudrate = baudrate;
@@ -147,14 +146,14 @@ public class UartWorker {
             serialPort.close();
             serialPort = null;
             logger.warn(String.format("closePort(), %s (%d, 8, N, 1) opened successfully", openedUartName, openedUartBaudrate));
-            sendMsgToParent(EVENT_UART_CLOSED, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "COM port closing"}, 0);
+            sendMsgToParent(EVENT_UART_CLOSED, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "closing COM port"});
         }
         if (android.os.Build.PRODUCT.equals(PRODUCT_RES_PX30)) {
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 100);  // set GPIO(51)/UART1_DTR_PIN_ to OFF state
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 100);  // set GPIO(45)/UART3_DTR_PIN_ to OFF state
+            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to OFF state
+            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to OFF state
         } else if (android.os.Build.PRODUCT.equals(PRODUCT_RES_RK3399)) {
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio83/value", 100);  // set GPIO(83)/UART0_DTR_PIN_ to OFF state
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio4/value", 100);   // set GPIO(4)/UART4_DTR_PIN_ to OFF state
+            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio83/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to OFF state
+            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio4/value", 0);   // set GPIO(4)/UART4_DTR_PIN_ to OFF state
         }
     }
 
@@ -169,7 +168,7 @@ public class UartWorker {
                 try {
                     mOutputStream.write(data.getBytes(), 0, data.length());
                 } catch (IOException e) {
-                    sendMsgToParent(EVENT_UART_ERROR, "", 0);
+                    sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "sending data to COM port"});
                     logger.error(String.format("sendData(), error sending data to %s (%d, 8, N, 1)", openedUartName, openedUartBaudrate), e);
                 }
             }
@@ -177,27 +176,26 @@ public class UartWorker {
     }
 
     /**
-     * Поток читает данные из UART и транслирует на главное активити
+     * Thread read data from COM port and send it to specified handler.
      */
     private class ReadThread extends Thread {
         @Override
         public void run() {
-
             int size;
             while (!isInterrupted()) {
                 try {
                     byte[] buffer = new byte[256];
                     size = mInputStream.read(buffer);
-                    if (size > 0) {
-                        mHandler.obtainMessage(EVENT_UART_READ, 1, size, buffer).sendToTarget();
-                    }
+                    if (size > 0)
+                        sendMsgToParent(EVENT_UART_READ, size, buffer);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    sendMsgToParent(EVENT_UART_ERROR, null, 0);
+                    sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "receiving data from COM port"});
+                    logger.error(String.format("ReadThread.run(), error reveiving data from %s (%d, 8, N, 1)", openedUartName, openedUartBaudrate), e);
                     return;
                 }
             }
-            logger.warn("ReadThread  CLOSED");
+            logger.warn("ReadThread closed, " + this.toString());
         }
     }
 
@@ -244,13 +242,13 @@ public class UartWorker {
     }
 
     /**
-     * Send message to MainActivity.
+     * Send message to handler in MainActivity.
      *
      * @param msgCode 'what' code for type of message
-     * @param dataObj any object with any desired data
      * @param arg     any desired int value
+     * @param dataObj any object with any desired data
      */
-    private void sendMsgToParent(int msgCode, Object dataObj, int arg) {
+    private void sendMsgToParent(int msgCode, int arg, Object dataObj) {
         mHandler.obtainMessage(msgCode, 1, arg, dataObj).sendToTarget();
     }
 }
