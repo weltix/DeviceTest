@@ -1,0 +1,169 @@
+package ua.com.ekka.devicetest.su;
+
+import android.content.Context;
+import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
+
+public class SuCommandsHelper {
+
+    private static final String TAG = "SU";
+
+    private static final String CMD_BUSYBOX_WHOAMI = "busybox whoami";
+    private static final String CMD_BUSYBOX_ID = "busybox id -u";
+    private static boolean isRooted = false;
+
+    private static Context mContext;
+
+    public SuCommandsHelper(Context context) {
+        this.mContext = context;
+    }
+
+     /**
+     * Executes command using 'su' process.
+     * Without timeout may be situations when command executes even 30sec (abnormal), so sometimes
+     * timeout is very useful.
+     *
+     * @param cmd
+     * @param timeout if > 0 then we are waiting for answer only for a specified time, and return TIMEOUT if don't receive specific answer;
+     *                if = 0 then we are waiting for answer till it will be received, and return only OK or ERROR.
+     * @return TIMEOUT (if timeout exhausted), OK, ERROR or specific answer.
+     */
+    public static String executeCmd(String cmd, long timeout) {
+
+        long stopTime = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeout);
+        long startTime = System.nanoTime();
+        String result = "";
+
+        int cnt = 0;
+        char[] buf = new char[1024];
+
+        DataOutputStream outputStream = null;
+        BufferedReader reader = null;
+        try {
+            Process su;
+            Log.w(TAG, "BEGIN CMD: " + cmd);
+
+            if (timeout > 0) {
+                su = Runtime.getRuntime().exec("su");
+                outputStream = new DataOutputStream(su.getOutputStream());
+                reader = new BufferedReader(new InputStreamReader(su.getInputStream()));
+
+                outputStream.writeBytes(cmd + "\n");//" && echo \"DONE\"
+                outputStream.flush();
+
+                while (!reader.ready()) {
+                    if (stopTime <= System.nanoTime()) {
+                        result = "TIMEOUT";
+                        break;
+                    }
+                    Thread.currentThread().sleep(100);
+                }
+
+                while (reader.ready()) {
+                    cnt = reader.read(buf, 0, buf.length);
+                    result += new String(buf, 0, cnt);
+                }
+                outputStream.writeBytes("exit\n");
+                outputStream.flush();
+            } else {
+                su = Runtime.getRuntime().exec(new String[]{"su", "-c", cmd});
+                su.waitFor();
+                result = (su.exitValue() == 0 ? "OK" : "ERROR");
+            }
+
+            Log.w(TAG, "END CMD:   " + cmd + "\nTIME:   " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + "ms\nRESULT: " + result);
+
+        } catch (IOException e) {
+            Log.e(TAG, "executeCmd IOException Error: " + e.getMessage());
+            result = "ERROR";
+
+        } catch (InterruptedException e) {
+            Log.e(TAG, "executeCmd InterruptedException Error: " + e.getMessage());
+            result = "ERROR";
+
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    result = "ERROR";
+
+                }
+            }
+            if (outputStream != null) {
+                try {
+                    outputStream.flush();
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    result = "ERROR";
+                }
+            }
+        }
+        return result;
+    }
+
+    private static SetupRootCallback setupRootCallback;
+
+    public interface SetupRootCallback {
+        void onSetupRoot(final int result);
+    }
+
+    public void setSetupRootCallback(SetupRootCallback cback) {
+        setupRootCallback = cback;
+    }
+
+    private void rootIsSetEvent(final int result) {
+        setupRootCallback.onSetupRoot(result);
+    }
+
+    private boolean checkRoot() {
+        boolean result = false;
+        String id = SuCommandsHelper.executeCmd(CMD_BUSYBOX_ID, 2000).trim();
+        String whoami = SuCommandsHelper.executeCmd(CMD_BUSYBOX_WHOAMI, 10000);  //10000
+        if (whoami.contains("root") || id.equals("0")) {
+            SuCommandsHelper.executeCmd("sync", 0);//2000
+            result = true;
+        } else {
+            Log.e(TAG, "access root is NOT granted");
+            result = false;
+        }
+        return result;
+    }
+
+    public void verifyRootRights() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                isRooted = false;
+                do {
+                    try {
+                        //Log.d(TAG, "VerifyRootRights... ");
+                        isRooted = checkRoot();
+                        if (isRooted) {
+                            Log.d(TAG, "verifyRootRights(), allowed");
+                            rootIsSetEvent(1);
+                        } else {
+                            Log.d(TAG, "verifyRootRights(), not allowed");
+                            rootIsSetEvent(0);
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } while (!isRooted);
+            }
+        });
+        thread.start();
+    }
+}

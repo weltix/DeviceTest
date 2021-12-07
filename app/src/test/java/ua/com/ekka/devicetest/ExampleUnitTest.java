@@ -1,4 +1,4 @@
-package ua.com.ekka.testrs232;
+package ua.com.ekka.devicetest;
 
 import static org.junit.Assert.assertEquals;
 
