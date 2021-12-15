@@ -94,11 +94,11 @@ public class MainActivity extends AppCompatActivity {
 //                onFailureHappened(R.drawable.warning, "ДОДАТКУ НЕ НАДАНО НЕОБХIДНИХ ДОЗВОЛIВ", "Necessary permissions denied by user", 80);
                 logger.debug("Size screen before input tap on permission dialog - x:" + sizeScreen.x + ", y:" + sizeScreen.y);
                 runOnUiThread(() -> {  // execute after dialog appears for surely (not because we want execute tap in main thread)
-                    if (sizeScreen.x == 1920) //14"
-                        SuCommandsHelper.executeCmd("input tap  1166 592", 0);  // don't use timeout here
-                    else                      //10"
+                    if (sizeScreen.x == 1920)  // 14' "res_rk3399"
+                        SuCommandsHelper.executeCmd("input tap  1165 560", 0);  // don't use timeout here
+                    else                       // 10' "res_px30"
                         SuCommandsHelper.executeCmd("input tap 845 445", 0);  // don't use timeout here
-                    System.exit(0);  // workaround - app restarts again (don't know why, but it works)
+                    System.exit(0);     // workaround - app restarts again (don't know why, but it works)
                 });
             }
         }

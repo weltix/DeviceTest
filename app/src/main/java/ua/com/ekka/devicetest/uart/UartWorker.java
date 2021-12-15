@@ -76,18 +76,18 @@ public class UartWorker {
                 break;
             case PRODUCT_RES_RK3399:
                 SERIAL_PORTS = SERIAL_PORTS_RES_RK3399;
-                SuCommandsHelper.executeCmd("echo 83 > /sys/class/gpio/export", 0);  // create GPIO(83) file for UART0_DTR_PIN_ (/dev/ttyS0)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio83/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 82 > /sys/class/gpio/export", 0);  // create GPIO(82) file for UART0_DSR_PIN_ (/dev/ttyS0)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio82/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 4 > /sys/class/gpio/export", 0);  // create GPIO(4) file for UART4_DTR_PIN_ (/dev/ttyS4)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio4/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 90 > /sys/class/gpio/export", 0);  // create GPIO(90) file for UART4_DSR_PIN_ (/dev/ttyS4)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio90/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio83/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio82/value", 0);  // set GPIO(82)/UART0_DSR_PIN_ to high level
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio4/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio90/value", 0);  // set GPIO(90)/UART4_DSR_PIN_ to high level
+                SuCommandsHelper.executeCmd("echo 1083 > /sys/class/gpio/export", 0);  // create GPIO(83) file for UART0_DTR_PIN_ (/dev/ttyS0)
+                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio1083/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 1082 > /sys/class/gpio/export", 0);  // create GPIO(82) file for UART0_DSR_PIN_ (/dev/ttyS0)
+                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio1082/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 1004 > /sys/class/gpio/export", 0);  // create GPIO(4) file for UART4_DTR_PIN_ (/dev/ttyS4)
+                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio1004/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 1090 > /sys/class/gpio/export", 0);  // create GPIO(90) file for UART4_DSR_PIN_ (/dev/ttyS4)
+                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio1090/direction", 0);  // set direction in special file
+                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1083/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to high level
+//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1082/value", 0);  // set GPIO(82)/UART0_DSR_PIN_ to high level
+                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1004/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to high level
+//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1090/value", 0);  // set GPIO(90)/UART4_DSR_PIN_ to high level
                 break;
             default:
                 SERIAL_PORTS = SERIAL_PORTS_AOSP_DRONE2;
@@ -108,9 +108,9 @@ public class UartWorker {
                 SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to ON state
         } else if (android.os.Build.PRODUCT.equals(PRODUCT_RES_RK3399)) {
             if (uartName.equals(SERIAL_PORTS_RES_RK3399[0]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio83/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to ON state
+                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio1083/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to ON state
             else if (uartName.equals(SERIAL_PORTS_RES_RK3399[1]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio4/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to ON state
+                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio1004/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to ON state
         }
 
         try {
@@ -152,8 +152,8 @@ public class UartWorker {
             SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to OFF state
             SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to OFF state
         } else if (android.os.Build.PRODUCT.equals(PRODUCT_RES_RK3399)) {
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio83/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to OFF state
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio4/value", 0);   // set GPIO(4)/UART4_DTR_PIN_ to OFF state
+            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1083/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to OFF state
+            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1004/value", 0);   // set GPIO(4)/UART4_DTR_PIN_ to OFF state
         }
     }
 
@@ -189,9 +189,8 @@ public class UartWorker {
                     if (size > 0)
                         sendMsgToParent(EVENT_UART_READ, size, buffer);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "receiving data from COM port"});
-                    logger.error(String.format("ReadThread.run(), error reveiving data from %s (%d, 8, N, 1)", openedUartName, openedUartBaudrate), e);
+                    logger.error(String.format("ReadThread.run(), error receiving data from %s (%d, 8, N, 1)", openedUartName, openedUartBaudrate), e);
                     return;
                 }
             }
