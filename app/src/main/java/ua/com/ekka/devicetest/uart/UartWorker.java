@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 
 import org.apache.log4j.Logger;
@@ -42,6 +43,7 @@ public class UartWorker {
     private String openedUartName;   // used to keep info about currently opened port (e.g. for logging)
     private int openedUartBaudrate;  // used to keep info about currently opened port (e.g. for logging)
 
+    private Context context;
     private Handler mHandler;
     private SerialPort serialPort;
     private OutputStream mOutputStream;
@@ -49,13 +51,13 @@ public class UartWorker {
     private ReadThread mReadThread;
 
     public static String UART_CHANGE_SETTINGS = "uart_change_settings";
-    private Context context;
 
     public UartWorker(Handler handler, Context context) {
         mHandler = handler;
         IntentFilter intentFilter = new IntentFilter(UART_CHANGE_SETTINGS);
         context.registerReceiver(uartChangeSettings, intentFilter);
-        switch (android.os.Build.PRODUCT) {
+        this.context = context;
+        switch (Build.PRODUCT) {
             case PRODUCT_AOSP_DRONE2:
                 SERIAL_PORTS = SERIAL_PORTS_AOSP_DRONE2;
                 break;
@@ -145,8 +147,8 @@ public class UartWorker {
         if (serialPort != null) {
             serialPort.close();
             serialPort = null;
-            logger.warn(String.format("closePort(), %s (%d, 8, N, 1) opened successfully", openedUartName, openedUartBaudrate));
-            sendMsgToParent(EVENT_UART_CLOSED, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "closing COM port"});
+            logger.warn(String.format("closePort(), %s (%d, 8, N, 1) closed.", openedUartName, openedUartBaudrate));
+            sendMsgToParent(EVENT_UART_CLOSED, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate)});
         }
         if (android.os.Build.PRODUCT.equals(PRODUCT_RES_PX30)) {
             SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to OFF state
@@ -168,15 +170,15 @@ public class UartWorker {
                 try {
                     mOutputStream.write(data.getBytes(), 0, data.length());
                 } catch (IOException e) {
-                    sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "sending data to COM port"});
                     logger.error(String.format("sendData(), error sending data to %s (%d, 8, N, 1)", openedUartName, openedUartBaudrate), e);
+                    sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "writing data to COM port"});
                 }
             }
         }
     }
 
     /**
-     * Thread read data from COM port and send it to specified handler.
+     * Thread reads data from COM port and sends it to specified handler.
      */
     private class ReadThread extends Thread {
         @Override
@@ -184,27 +186,32 @@ public class UartWorker {
             int size;
             while (!isInterrupted()) {
                 try {
+                    if (mInputStream == null || serialPort == null) {
+                        sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "reading data from COM port"});
+                        logger.error("ReadThread.run(), serialPort or it's mInputStream became null unexpectedly.");
+                        return;
+                    }
                     byte[] buffer = new byte[256];
                     size = mInputStream.read(buffer);
                     if (size > 0)
                         sendMsgToParent(EVENT_UART_READ, size, buffer);
                 } catch (Exception e) {
-                    sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "receiving data from COM port"});
-                    logger.error(String.format("ReadThread.run(), error receiving data from %s (%d, 8, N, 1)", openedUartName, openedUartBaudrate), e);
+                    sendMsgToParent(EVENT_UART_ERROR, 1, new String[]{openedUartName, String.valueOf(openedUartBaudrate), "reading data from COM port"});
+                    logger.error(String.format("ReadThread.run(), ReadThread=%s, error receiving data from %s (%d, 8, N, 1)", this.toString(), openedUartName, openedUartBaudrate), e);
                     return;
                 }
             }
-            logger.warn("ReadThread closed, " + this.toString());
+            logger.warn(String.format("ReadThread closed, ReadThread=%s", this.toString()));
         }
     }
 
     /**
-     * Приемник сообщений об изменении параметров настройки порта
+     * Receiver of messages about changing COM port parameters.
      */
     public BroadcastReceiver uartChangeSettings = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            logger.debug("BroadcastReceiver [uartChangeSettings]");
+            logger.debug("BroadcastReceiver.onReceive(), uartChangeSettings");
 
 //            if (intent.getAction().equals(UART_CHANGE_SETTINGS)) {
 //                PrefValues prefValues = PrefWorker.getValues();
@@ -218,6 +225,10 @@ public class UartWorker {
         }
     };
 
+    public void unregisterUartChangeSettingsReceiver() {
+        context.unregisterReceiver(uartChangeSettings);
+    }
+
     /**
      * Проверка соответствия возможно доступных портов
      *
@@ -225,7 +236,6 @@ public class UartWorker {
      * @return
      */
     public static String getCoreNameUart(String appNameUart) {
-
         String result = SERIAL_PORTS[0];
         int iPort = -1;
 //        for (int i = 0; i < SERIAL_PORTS.length; i++) {
