@@ -59,22 +59,22 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_now_tested"
+        app:layout_constraintTop_toBottomOf="@+id/textview_test_status"
         tools:text="Tested COM"
         tools:visibility="visible" />
 
     <TextView
-        android:id="@+id/textview_now_tested"
+        android:id="@+id/textview_test_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
-        android:text="@string/testing_now"
         android:textColor="@color/black"
         android:textSize="34sp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioGroup"
+        tools:text="@string/testing_now"
         tools:visibility="visible" />
 
     <TextView

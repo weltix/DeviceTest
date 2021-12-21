@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_PX30 = "res_px30";
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
-    private TextView textViewNowTested;
+    private TextView textViewTestStatus;
     private TextView textViewNowTestedCom;
     private TextView textViewNowTestedBaudrate;
     private TextView textViewTestResult;
@@ -69,7 +69,9 @@ public class MainActivity extends AppCompatActivity {
                     int comNumber = msg.arg2;
                     String[] obj0 = (String[]) msg.obj;
                     runOnUiThread(() -> {
-                        textViewNowTested.setText(getString(R.string.testing_now));
+                        buttonStart.setEnabled(false);
+                        buttonStop.setEnabled(true);
+                        textViewTestStatus.setText(getString(R.string.testing_now));
                         textViewNowTestedCom.setText("COM" + comNumber);
                         textViewNowTestedBaudrate.setText(obj0[1]);
                     });
@@ -77,11 +79,28 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case UartWorker.EVENT_UART_CLOSED:
                     String[] obj1 = (String[]) msg.obj;
+                    runOnUiThread(() -> {
+                        buttonStart.setEnabled(true);
+                        buttonStop.setEnabled(false);
+                    });
 //                    logger.debug(String.format("EVENT_UART_CLOSED, %s (%s, 8, N, 1) (COM%d)", obj1[0], obj1[1], msg.arg2));
                     break;
                 case UartWorker.EVENT_UART_ERROR:
                     String[] obj2 = (String[]) msg.obj;
-                    if (msg.arg2 == 0) {
+                    int errorCode = msg.arg2;
+                    if (errorCode == 0) {
+                        runOnUiThread(() -> {
+                            textViewTestResult.setText(getString(R.string.error_opening_com_port));
+                            textViewTestResult.setTextColor(getResources().getColor(R.color.red));
+                            textViewTestResult.setVisibility(View.VISIBLE);
+                            new Handler().postDelayed(() -> {
+                                textViewTestResult.setVisibility(View.INVISIBLE);
+                                textViewTestResult.setText("");
+                                textViewTestResult.setTextColor(getResources().getColor(R.color.black));
+                                buttonStart.setEnabled(true);
+                                buttonStop.setEnabled(false);
+                            }, 1000);
+                        });
                         logger.debug(String.format("EVENT_UART_ERROR, %s (%s, 8, N, 1), when %s", obj2[0], obj2[1], obj2[2]));
                     }
                     break;
@@ -109,9 +128,7 @@ public class MainActivity extends AppCompatActivity {
         Button button = (Button) v;
         switch (button.getId()) {
             case R.id.button_start:
-                buttonStart.setEnabled(false);
-                buttonStop.setEnabled(true);
-                textViewNowTested.setVisibility(View.VISIBLE);
+                textViewTestStatus.setVisibility(View.VISIBLE);
                 textViewNowTestedCom.setVisibility(View.VISIBLE);
                 textViewNowTestedBaudrate.setVisibility(View.VISIBLE);
                 String selectedCom = String.valueOf(((RadioButton) findViewById(selectedRadioButtonCom)).getText());
@@ -120,22 +137,19 @@ public class MainActivity extends AppCompatActivity {
 
 //                new Thread(() -> {
 //                    for (int currentBaudrate:  baudrates) {
-//                        uartWorker.openPort(Integer.parseInt(selectedComNumber), currentBaudrate);
-//                        uartWorker.sendData("1234567890");
+                uartWorker.openPort(Integer.parseInt(selectedComNumber), 9600);
+                uartWorker.sendData("1234567890");
 //                    }
 //                }).start();
 
 
-
                 break;
             case R.id.button_stop:
-                buttonStop.setEnabled(false);
-                buttonStart.setEnabled(true);
                 uartWorker.closePort();
-                textViewNowTested.setText("");
+                textViewTestStatus.setText("");
                 textViewNowTestedCom.setText("");
                 textViewNowTestedBaudrate.setText("");
-                textViewNowTested.setVisibility(View.INVISIBLE);
+                textViewTestStatus.setVisibility(View.INVISIBLE);
                 textViewNowTestedCom.setVisibility(View.INVISIBLE);
                 textViewNowTestedBaudrate.setVisibility(View.INVISIBLE);
                 break;
@@ -200,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radioButtonCom2 = findViewById(R.id.radio_button_com_2);
         radioButtonCom2.setOnClickListener(radioButtonClickListener);
 
-        textViewNowTested = findViewById(R.id.textview_now_tested);
+        textViewTestStatus = findViewById(R.id.textview_test_status);
         textViewNowTestedCom = findViewById(R.id.textview_now_testing_com);
         textViewNowTestedBaudrate = findViewById(R.id.textview_now_testing_baudrate);
         textViewTestResult = findViewById(R.id.textview_test_result);

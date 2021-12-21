@@ -153,7 +153,7 @@ public class UartWorker {
             sendMsgToParent(EVENT_UART_OPEN, uartNum, new String[]{uartName, String.valueOf(baudrate)});
         } catch (IOException | SecurityException | NullPointerException e) {
             logger.error(String.format("openPort(), error opening %s (%d, 8, N, 1) (COM%d)", uartName, baudrate, uartNum), e);
-            sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{uartName, String.valueOf(baudrate), "opening COM port"});
+            sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{uartName, String.valueOf(baudrate), "opening port COM" + uartNum});
         }
         openedUartNumber = uartNum;
         openedUartName = uartName;
