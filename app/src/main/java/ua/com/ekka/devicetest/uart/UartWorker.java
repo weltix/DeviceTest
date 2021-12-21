@@ -4,10 +4,6 @@ import static ua.com.ekka.devicetest.MainActivity.PRODUCT_AOSP_DRONE2;
 import static ua.com.ekka.devicetest.MainActivity.PRODUCT_RES_PX30;
 import static ua.com.ekka.devicetest.MainActivity.PRODUCT_RES_RK3399;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
 
@@ -17,6 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
@@ -33,86 +34,104 @@ public class UartWorker {
     public static final int EVENT_UART_READ = 2;
     public static final int EVENT_UART_ERROR = 3;
 
-    public static String[] SERIAL_PORTS;
-    public static String[] SERIAL_PORTS_AOSP_DRONE2 = {"/dev/ttySAC1", "/dev/ttySAC2"};
-    public static String[] SERIAL_PORTS_RES_PX30 = {"/dev/ttyS1", "/dev/ttyS3"};
-    public static String[] SERIAL_PORTS_RES_RK3399 = {"/dev/ttyS0", "/dev/ttyS4"};
+    public static final String OUT = "out";
+    public static final String IN = "in";
+
+    private String[] serialPorts;                 // all for current device
+    private Map<String, List<Integer>> dtrsDsrs;  // all for every COM port of current device
+
+    private static final String[] SERIAL_PORTS_AOSP_DRONE2 = {"/dev/ttySAC1", "/dev/ttySAC2"};
+
+    private static final String[] SERIAL_PORTS_RES_PX30 = {"/dev/ttyS1", "/dev/ttyS3"};
+    private static final Map<String, List<Integer>> DTR_DSR_RES_PX30;
+
+    static {
+        DTR_DSR_RES_PX30 = new HashMap<>();
+        DTR_DSR_RES_PX30.put(SERIAL_PORTS_RES_PX30[0], new ArrayList<>(Arrays.asList(51, 50)));  // DTR and DSR for one port
+        DTR_DSR_RES_PX30.put(SERIAL_PORTS_RES_PX30[1], new ArrayList<>(Arrays.asList(45, 44)));  // DTR and DSR for one port
+    }
+
+    private static final String[] SERIAL_PORTS_RES_RK3399 = {"/dev/ttyS0", "/dev/ttyS4"};
+    private static final Map<String, List<Integer>> DTR_DSR_RES_RK3399;
+
+    static {
+        DTR_DSR_RES_RK3399 = new HashMap<>();
+        DTR_DSR_RES_RK3399.put(SERIAL_PORTS_RES_RK3399[0], new ArrayList<>(Arrays.asList(1083, 1082)));  // DTR and DSR for one port
+        DTR_DSR_RES_RK3399.put(SERIAL_PORTS_RES_RK3399[1], new ArrayList<>(Arrays.asList(1004, 1090)));  // DTR and DSR for one port
+    }
 
     public static int[] baudrates = {9600, 19200, 38400, 57600, 115200};
 
-    private String openedUartName;   // used to keep info about currently opened port (e.g. for logging)
-    private int openedUartBaudrate;  // used to keep info about currently opened port (e.g. for logging)
+    public int openedUartNumber;    // e.g. COM1, COM2 etc.
+    public String openedUartName;   // used to keep info about currently opened port (e.g. for logging)
+    public int openedUartBaudrate;  // used to keep info about currently opened port (e.g. for logging)
 
-    private Context context;
     private Handler mHandler;
     private SerialPort serialPort;
     private OutputStream mOutputStream;
     private InputStream mInputStream;
     private ReadThread mReadThread;
 
-    public static String UART_CHANGE_SETTINGS = "uart_change_settings";
-
-    public UartWorker(Handler handler, Context context) {
+    /**
+     * Set {@link #serialPorts} for current device and tune GPIO contacts as DTR and DSR for
+     * used COM ports.
+     *
+     * @param handler
+     */
+    public UartWorker(Handler handler) {
         mHandler = handler;
-        IntentFilter intentFilter = new IntentFilter(UART_CHANGE_SETTINGS);
-        context.registerReceiver(uartChangeSettings, intentFilter);
-        this.context = context;
         switch (Build.PRODUCT) {
             case PRODUCT_AOSP_DRONE2:
-                SERIAL_PORTS = SERIAL_PORTS_AOSP_DRONE2;
+                serialPorts = SERIAL_PORTS_AOSP_DRONE2;
                 break;
             case PRODUCT_RES_PX30:
-                SERIAL_PORTS = SERIAL_PORTS_RES_PX30;
-                SuCommandsHelper.executeCmd("echo 51 > /sys/class/gpio/export", 0);  // create GPIO(51) file for UART1_DTR_PIN_ (/dev/ttyS1)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio51/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 50 > /sys/class/gpio/export", 0);  // create GPIO(50) file for UART1_DSR_PIN_ (/dev/ttyS1)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio50/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 45 > /sys/class/gpio/export", 0);  // create GPIO(45) file for UART3_DTR_PIN_ (/dev/ttyS3)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio45/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 44 > /sys/class/gpio/export", 0);  // create GPIO(44) file for UART3_DSR_PIN_ (/dev/ttyS3)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio44/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio50/value", 0);  // set GPIO(50)/UART1_DSR_PIN_ to high level
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio44/value", 0);  // set GPIO(44)/UART3_DSR_PIN_ to high level
+                serialPorts = SERIAL_PORTS_RES_PX30;
+                dtrsDsrs = DTR_DSR_RES_PX30;
+                for (String port : serialPorts)
+                    initGpioContacts(port);
                 break;
             case PRODUCT_RES_RK3399:
-                SERIAL_PORTS = SERIAL_PORTS_RES_RK3399;
-                SuCommandsHelper.executeCmd("echo 1083 > /sys/class/gpio/export", 0);  // create GPIO(83) file for UART0_DTR_PIN_ (/dev/ttyS0)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio1083/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1082 > /sys/class/gpio/export", 0);  // create GPIO(82) file for UART0_DSR_PIN_ (/dev/ttyS0)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio1082/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1004 > /sys/class/gpio/export", 0);  // create GPIO(4) file for UART4_DTR_PIN_ (/dev/ttyS4)
-                SuCommandsHelper.executeCmd("echo out > /sys/class/gpio/gpio1004/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1090 > /sys/class/gpio/export", 0);  // create GPIO(90) file for UART4_DSR_PIN_ (/dev/ttyS4)
-                SuCommandsHelper.executeCmd("echo in > /sys/class/gpio/gpio1090/direction", 0);  // set direction in special file
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1083/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1082/value", 0);  // set GPIO(82)/UART0_DSR_PIN_ to high level
-                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1004/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to high level
-//                SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1090/value", 0);  // set GPIO(90)/UART4_DSR_PIN_ to high level
+                serialPorts = SERIAL_PORTS_RES_RK3399;
+                dtrsDsrs = DTR_DSR_RES_RK3399;
+                for (String port : serialPorts)
+                    initGpioContacts(port);
                 break;
             default:
-                SERIAL_PORTS = SERIAL_PORTS_AOSP_DRONE2;
+                serialPorts = SERIAL_PORTS_AOSP_DRONE2;
         }
+    }
+
+    /**
+     * Set specified GPIO contacts as DTR and DSR lines for specified COM port.
+     *
+     * @param port
+     */
+    private void initGpioContacts(String port) {
+        int gpioNum = dtrsDsrs.get(port).get(0);
+        useGpioContact(gpioNum, OUT);               // as DTR
+        setDTR(gpioNum, 0);                   // reset current GPIO contact to 0 as for DTR line of COM port according to RS-232 specification
+        gpioNum = dtrsDsrs.get(port).get(1);
+        useGpioContact(gpioNum, IN);                // as DSR
     }
 
     /**
      * Opens serial port.
      *
-     * @param uartName "/dev/ttySAC1", "/dev/ttySAC2", "/dev/ttyS1", "/dev/ttyS3" etc.
+     * @param uartNum  1, 2, 3 etc. - means COM1, COM2, COM3 etc. Starts from 1.
      * @param baudrate speed
      */
-    public void openPort(String uartName, int baudrate) {
-        if (android.os.Build.PRODUCT.equals(PRODUCT_RES_PX30)) {
-            if (uartName.equals(SERIAL_PORTS_RES_PX30[0]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to ON state
-            else if (uartName.equals(SERIAL_PORTS_RES_PX30[1]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to ON state
-        } else if (android.os.Build.PRODUCT.equals(PRODUCT_RES_RK3399)) {
-            if (uartName.equals(SERIAL_PORTS_RES_RK3399[0]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio1083/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to ON state
-            else if (uartName.equals(SERIAL_PORTS_RES_RK3399[1]))
-                SuCommandsHelper.executeCmd("echo 0 > /sys/class/gpio/gpio1004/value", 0);  // set GPIO(4)/UART4_DTR_PIN_ to ON state
+    public void openPort(int uartNum, int baudrate) {
+        closePort();  // initially we close previous port opened by this UartWorker
+
+        String uartName = "";
+        if (uartNum < 1)
+            logger.error(String.format("openPort(), error opening COM with number %s", uartNum));
+        else
+            uartName = serialPorts[uartNum - 1];
+
+        if (!Build.PRODUCT.equals(PRODUCT_AOSP_DRONE2)) {
+            int gpioNum = dtrsDsrs.get(uartName).get(0);
+            setDTR(gpioNum, 1);
         }
 
         try {
@@ -130,12 +149,13 @@ public class UartWorker {
                 mReadThread.interrupt();
             mReadThread = new ReadThread();
             mReadThread.start();
-            logger.warn(String.format("openPort(), %s (%d, 8, N, 1) opened successfully", uartName, baudrate));
-            sendMsgToParent(EVENT_UART_OPEN, 0, new String[]{uartName, String.valueOf(baudrate)});
+            logger.warn(String.format("openPort(), %s (%d, 8, N, 1) opened successfully (COM%d)", uartName, baudrate, uartNum));
+            sendMsgToParent(EVENT_UART_OPEN, uartNum, new String[]{uartName, String.valueOf(baudrate)});
         } catch (IOException | SecurityException | NullPointerException e) {
-            logger.error(String.format("openPort(), error opening %s (%d, 8, N, 1)", uartName, baudrate), e);
+            logger.error(String.format("openPort(), error opening %s (%d, 8, N, 1) (COM%d)", uartName, baudrate, uartNum), e);
             sendMsgToParent(EVENT_UART_ERROR, 0, new String[]{uartName, String.valueOf(baudrate), "opening COM port"});
         }
+        openedUartNumber = uartNum;
         openedUartName = uartName;
         openedUartBaudrate = baudrate;
     }
@@ -147,15 +167,15 @@ public class UartWorker {
         if (serialPort != null) {
             serialPort.close();
             serialPort = null;
-            logger.warn(String.format("closePort(), %s (%d, 8, N, 1) closed.", openedUartName, openedUartBaudrate));
-            sendMsgToParent(EVENT_UART_CLOSED, 0, new String[]{openedUartName, String.valueOf(openedUartBaudrate)});
-        }
-        if (android.os.Build.PRODUCT.equals(PRODUCT_RES_PX30)) {
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio51/value", 0);  // set GPIO(51)/UART1_DTR_PIN_ to OFF state
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio45/value", 0);  // set GPIO(45)/UART3_DTR_PIN_ to OFF state
-        } else if (android.os.Build.PRODUCT.equals(PRODUCT_RES_RK3399)) {
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1083/value", 0);  // set GPIO(83)/UART0_DTR_PIN_ to OFF state
-            SuCommandsHelper.executeCmd("echo 1 > /sys/class/gpio/gpio1004/value", 0);   // set GPIO(4)/UART4_DTR_PIN_ to OFF state
+            logger.warn(String.format("closePort(), %s (%d, 8, N, 1) closed (COM%d)", openedUartName, openedUartBaudrate, openedUartNumber));
+            sendMsgToParent(EVENT_UART_CLOSED, openedUartNumber, new String[]{openedUartName, String.valueOf(openedUartBaudrate)});
+
+            if (!Build.PRODUCT.equals(PRODUCT_AOSP_DRONE2)) {
+                for (List<Integer> dtrDsr : dtrsDsrs.values()) {
+                    int gpioNum = dtrDsr.get(0);
+                    setDTR(gpioNum, 0);
+                }
+            }
         }
     }
 
@@ -206,51 +226,6 @@ public class UartWorker {
     }
 
     /**
-     * Receiver of messages about changing COM port parameters.
-     */
-    public BroadcastReceiver uartChangeSettings = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            logger.debug("BroadcastReceiver.onReceive(), uartChangeSettings");
-
-//            if (intent.getAction().equals(UART_CHANGE_SETTINGS)) {
-//                PrefValues prefValues = PrefWorker.getValues();
-//                if (!getCoreNameUart(prefValues.uartName).equals(uartName)
-//                        || prefValues.baudrate != baudrate
-//                        || prefValues.flowControl != flowControl) {
-//                    closeSerialPort();
-//                    openPort(getCoreNameUart(prefValues.uartName), prefValues.baudrate, prefValues.flowControl, 0);
-//                }
-//            }
-        }
-    };
-
-    public void unregisterUartChangeSettingsReceiver() {
-        context.unregisterReceiver(uartChangeSettings);
-    }
-
-    /**
-     * Проверка соответствия возможно доступных портов
-     *
-     * @param appNameUart
-     * @return
-     */
-    public static String getCoreNameUart(String appNameUart) {
-        String result = SERIAL_PORTS[0];
-        int iPort = -1;
-//        for (int i = 0; i < SERIAL_PORTS.length; i++) {
-//            if (appNameUart.equals(DEF_UARTS[i])) {
-//                iPort = i;
-//                break;
-//            }
-//        }
-        if (iPort >= 0) {
-            result = SERIAL_PORTS[iPort];
-        }
-        return result;
-    }
-
-    /**
      * Send message to handler in MainActivity.
      *
      * @param msgCode 'what' code for type of message
@@ -259,5 +234,49 @@ public class UartWorker {
      */
     private void sendMsgToParent(int msgCode, int arg, Object dataObj) {
         mHandler.obtainMessage(msgCode, 1, arg, dataObj).sendToTarget();
+    }
+
+    /**
+     * We use some GPIO contacts as DTR and DSR lines of our COM ports.
+     *
+     * @param gpioNum   GPIO contact's number
+     * @param direction {@link #IN} or {@link #OUT}
+     */
+    private void useGpioContact(int gpioNum, String direction) {
+        SuCommandsHelper.executeCmd(String.format("echo %d > /sys/class/gpio/export", gpioNum), 0);                       // create file for specified GPIO contact (e.g. "echo 51 > /sys/class/gpio/export")
+        SuCommandsHelper.executeCmd(String.format("echo %s > /sys/class/gpio/gpio%d/direction", direction, gpioNum), 0);  // set GPIO contact as output or input (e.g. "echo out > /sys/class/gpio/gpio51/direction")
+    }
+
+    /**
+     * DTR line is inverted (if compare to RS-232 specification), so we first prepare it (invert).
+     *
+     * @param gpioNum
+     * @param value   value according to RS-232 specification:
+     *                1 - this UART is ready, 0 - this UART is not ready.
+     */
+    private void setDTR(int gpioNum, int value) {
+        int revertedValue = 1 - value;
+        String command = String.format("echo %d > /sys/class/gpio/gpio%d/value", revertedValue, gpioNum);
+        SuCommandsHelper.executeCmd(command, 0);
+    }
+
+    /**
+     * DSR line state is inverted (if compare to RS-232 specification), so we return it inverted.
+     *
+     * @param gpioNum
+     * @return value according to RS-232 specification:
+     * 1 - connected device is ready,
+     * 0 - connected device is not ready.
+     */
+    private int getDSR(int gpioNum) {
+        String command = String.format("cat /sys/class/gpio/gpio%d/value", gpioNum);
+        String response = SuCommandsHelper.executeCmd(command, 0);
+        int result = -1;
+        try {
+            result = 1 - Integer.valueOf(response);  // invert response
+        } catch (NumberFormatException e) {
+            logger.error("getDSR()", e);
+        }
+        return result;
     }
 }

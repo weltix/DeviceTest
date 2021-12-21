@@ -1,18 +1,19 @@
 package ua.com.ekka.devicetest;
 
-import static ua.com.ekka.devicetest.uart.UartWorker.SERIAL_PORTS;
-import static ua.com.ekka.devicetest.uart.UartWorker.baudrates;
-
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
+import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -20,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import org.apache.log4j.Logger;
+
+import java.nio.charset.StandardCharsets;
 
 import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
@@ -35,31 +38,109 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_PX30 = "res_px30";
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
+    private TextView textViewNowTested;
+    private TextView textViewNowTestedCom;
+    private TextView textViewNowTestedBaudrate;
+    private TextView textViewTestResult;
+    private Button buttonStart;
+    private Button buttonStop;
+
+    private int selectedRadioButtonCom = R.id.radio_button_com_1;
+
     private UartWorker uartWorker;
 
-    private Handler uartEventsHandler = new Handler(Looper.getMainLooper()) {
+    private static HandlerThread uartEventsHandlerThread = new HandlerThread("uartEventsHandlerThread");
+
+    static {
+        uartEventsHandlerThread.start();
+    }
+
+    private Handler uartEventsHandler = new Handler(uartEventsHandlerThread.getLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case UartWorker.EVENT_UART_READ:
-                    logger.debug("EVENT_UART_READ");
+                    String str = new String((byte[]) msg.obj, StandardCharsets.UTF_8);
+                    System.out.println(str);
 //                    cmdParser.parseInputStr((byte[]) msg.obj, msg.arg2);
+//                    logger.debug("EVENT_UART_READ");
                     break;
                 case UartWorker.EVENT_UART_OPEN:
+                    int comNumber = msg.arg2;
                     String[] obj0 = (String[]) msg.obj;
-                    logger.debug(String.format("EVENT_UART_OPENED, %s (%s, 8, N, 1)", obj0[0], obj0[1]));
+                    runOnUiThread(() -> {
+                        textViewNowTested.setText(getString(R.string.testing_now));
+                        textViewNowTestedCom.setText("COM" + comNumber);
+                        textViewNowTestedBaudrate.setText(obj0[1]);
+                    });
+//                    logger.debug(String.format("EVENT_UART_OPENED, %s (%s, 8, N, 1) (COM%d)", obj0[0], obj0[1], msg.arg2));
                     break;
                 case UartWorker.EVENT_UART_CLOSED:
                     String[] obj1 = (String[]) msg.obj;
-                    logger.debug(String.format("EVENT_UART_CLOSED, %s (%s, 8, N, 1)", obj1[0], obj1[1]));
-//                    setVisibleContext(CONTEXT_CONNECT, null);
+//                    logger.debug(String.format("EVENT_UART_CLOSED, %s (%s, 8, N, 1) (COM%d)", obj1[0], obj1[1], msg.arg2));
                     break;
                 case UartWorker.EVENT_UART_ERROR:
                     String[] obj2 = (String[]) msg.obj;
-                    if (msg.arg2 == 0)
+                    if (msg.arg2 == 0) {
                         logger.debug(String.format("EVENT_UART_ERROR, %s (%s, 8, N, 1), when %s", obj2[0], obj2[1], obj2[2]));
+                    }
                     break;
             }
+        }
+    };
+
+    private View.OnClickListener radioButtonClickListener = v -> {
+        RadioButton radioButton = (RadioButton) v;
+        if (selectedRadioButtonCom != radioButton.getId()) {
+            selectedRadioButtonCom = radioButton.getId();
+            buttonStop.performClick();
+        }
+        switch (radioButton.getId()) {
+            case R.id.radio_button_com_1:
+                break;
+            case R.id.radio_button_com_2:
+                break;
+            default:
+                break;
+        }
+    };
+
+    private View.OnClickListener buttonClickListener = v -> {
+        Button button = (Button) v;
+        switch (button.getId()) {
+            case R.id.button_start:
+                buttonStart.setEnabled(false);
+                buttonStop.setEnabled(true);
+                textViewNowTested.setVisibility(View.VISIBLE);
+                textViewNowTestedCom.setVisibility(View.VISIBLE);
+                textViewNowTestedBaudrate.setVisibility(View.VISIBLE);
+                String selectedCom = String.valueOf(((RadioButton) findViewById(selectedRadioButtonCom)).getText());
+                String selectedComNumber = selectedCom.substring(selectedCom.length() - 1);
+
+
+//                new Thread(() -> {
+//                    for (int currentBaudrate:  baudrates) {
+//                        uartWorker.openPort(Integer.parseInt(selectedComNumber), currentBaudrate);
+//                        uartWorker.sendData("1234567890");
+//                    }
+//                }).start();
+
+
+
+                break;
+            case R.id.button_stop:
+                buttonStop.setEnabled(false);
+                buttonStart.setEnabled(true);
+                uartWorker.closePort();
+                textViewNowTested.setText("");
+                textViewNowTestedCom.setText("");
+                textViewNowTestedBaudrate.setText("");
+                textViewNowTested.setVisibility(View.INVISIBLE);
+                textViewNowTestedCom.setVisibility(View.INVISIBLE);
+                textViewNowTestedBaudrate.setVisibility(View.INVISIBLE);
+                break;
+            default:
+                break;
         }
     };
 
@@ -114,8 +195,22 @@ public class MainActivity extends AppCompatActivity {
         }
         logger.info("onCreate(), screen size x:" + sizeScreen.x + ", y:" + sizeScreen.y);
 
-        uartWorker = new UartWorker(uartEventsHandler, this);
-        uartWorker.openPort(SERIAL_PORTS[0], baudrates[0]);
+        RadioButton radioButtonCom1 = findViewById(R.id.radio_button_com_1);
+        radioButtonCom1.setOnClickListener(radioButtonClickListener);
+        RadioButton radioButtonCom2 = findViewById(R.id.radio_button_com_2);
+        radioButtonCom2.setOnClickListener(radioButtonClickListener);
+
+        textViewNowTested = findViewById(R.id.textview_now_tested);
+        textViewNowTestedCom = findViewById(R.id.textview_now_testing_com);
+        textViewNowTestedBaudrate = findViewById(R.id.textview_now_testing_baudrate);
+        textViewTestResult = findViewById(R.id.textview_test_result);
+        buttonStart = findViewById(R.id.button_start);
+        buttonStop = findViewById(R.id.button_stop);
+
+        buttonStart.setOnClickListener(buttonClickListener);
+        buttonStop.setOnClickListener(buttonClickListener);
+
+        uartWorker = new UartWorker(uartEventsHandler);
     }
 
     @Override
@@ -128,7 +223,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         logger.info("onDestroy()");
-        if (uartWorker != null)
-            uartWorker.unregisterUartChangeSettingsReceiver();
     }
 }
