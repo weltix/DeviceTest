@@ -60,8 +60,7 @@ public class UartWorker {
         DTR_DSR_RES_RK3399.put(SERIAL_PORTS_RES_RK3399[1], new ArrayList<>(Arrays.asList(1004, 1090)));  // DTR and DSR for one port
     }
 
-    public static int[] baudrates = {9600, 19200, 38400, 57600, 115200};
-    public static int[] baudratesUpDown = {9600, 19200, 38400, 57600, 115200, 57600, 38400, 19200, 9600};
+    public static Integer[] baudrates = {9600, 19200, 38400, 57600, 115200};
 
     public int openedUartNumber;    // e.g. COM1, COM2 etc.
     public String openedUartName;   // used to keep info about currently opened port (e.g. for logging)

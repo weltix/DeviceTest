@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -28,6 +29,8 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_PX30 = "res_px30";
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
+    private CheckBox checkBoxBaudratesDirection;
     private TextView textViewTestStatus;
     private ProgressBar progressBar;
     private TextView textViewNowTestedCom;
@@ -87,8 +91,9 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         buttonStop.setEnabled(true);
                         textViewTestStatus.setText(getString(R.string.testing_now));
-                        textViewNowTestedCom.setText("порт:          COM" + comNum_);
+                        textViewNowTestedCom.setText("         порт: COM" + comNum_);
                         textViewNowTestedBaudrate.setText("скорость: " + obj0[1]);
+                        checkBoxBaudratesDirection.setEnabled(false);
                         textViewTestStatus.setVisibility(View.VISIBLE);
                         progressBar.setVisibility(View.VISIBLE);
                         textViewNowTestedCom.setVisibility(View.VISIBLE);
@@ -153,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 String selectedCom = String.valueOf(((RadioButton) findViewById(selectedRadioButtonComId)).getText());
                 String selectedComNumber = selectedCom.substring(selectedCom.length() - 1);
                 Integer selectedComNum = Integer.parseInt(selectedComNumber);
-                runRxdTxdTest(selectedComNum);
+                runTest(selectedComNum);
                 break;
             case R.id.button_stop:
                 if (testingThread != null)
@@ -161,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 uartWorker.closePort();
                 buttonStop.setEnabled(false);
                 buttonStart.setEnabled(true);
+                checkBoxBaudratesDirection.setEnabled(true);
                 textViewTestStatus.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
                 textViewNowTestedCom.setVisibility(View.INVISIBLE);
@@ -230,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radioButtonCom2 = findViewById(R.id.radio_button_com_2);
         radioButtonCom2.setOnClickListener(radioButtonClickListener);
 
+        checkBoxBaudratesDirection = findViewById(R.id.checkBoxBaudratesDirection);
         textViewTestStatus = findViewById(R.id.textview_test_status);
         progressBar = findViewById(R.id.progressBar);
         textViewNowTestedCom = findViewById(R.id.textview_now_testing_com);
@@ -262,27 +269,31 @@ public class MainActivity extends AppCompatActivity {
         textViewTestResult.setVisibility(View.VISIBLE);
     }
 
-    private void runRxdTxdTest(int selectedComNum) {
+    private void runTest(int selectedComNum) {
         testingThread = new Thread(() -> {
-            String resultTestString = "";  // all or nothing - either this string remains empty (or become null), or it will receive full complete testing string
-            for (int currentBaudrate : baudrates) {
+            String textFile = "TextForTest.txt";  // from assets directory
+            byte[] buffer = null;
+            InputStream inputStream;
+            try {
+                inputStream = getAssets().open(textFile);
+                int size = inputStream.available();
+                buffer = new byte[size];
+                inputStream.read(buffer);
+                inputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            sendingTestString = new String(buffer);
+
+            Integer[] baudratesCopy = Arrays.copyOf(baudrates, baudrates.length);
+            if (checkBoxBaudratesDirection.isChecked())
+                Arrays.sort(baudratesCopy, Collections.reverseOrder());
+
+            for (int currentBaudrate : baudratesCopy) {
+                String resultTestString = "";  // all or nothing - either this string remains empty (or become null), or it will receive full complete testing string
                 receivedTestStringBuilder.setLength(0);
                 receivedTestStringBuilder.trimToSize();
                 blockingQueueForReceivedTestString.clear();
-
-                String textFile = "TextForTest.txt";
-                byte[] buffer = null;
-                InputStream inputStream;
-                try {
-                    inputStream = getAssets().open(textFile);
-                    int size = inputStream.available();
-                    buffer = new byte[size];
-                    inputStream.read(buffer);
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                sendingTestString = new String(buffer);
 
                 uartWorker.openPort(selectedComNum, currentBaudrate);
                 uartWorker.sendData(sendingTestString);

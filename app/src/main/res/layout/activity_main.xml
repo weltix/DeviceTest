@@ -72,6 +72,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
         android:textSize="34sp"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
@@ -133,5 +134,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/button_start" />
+
+    <CheckBox
+        android:id="@+id/checkBoxBaudratesDirection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="140dp"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:text="Скоростя в порядке убывания"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@+id/radioGroup"
+        app:layout_constraintTop_toTopOf="@+id/radioGroup" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
