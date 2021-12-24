@@ -14,6 +14,7 @@
     <color name="app_background">#E1FFBF</color>
 
     <color name="green">#31B837</color>
-    <color name="red">#F65C2D</color>
+    <color name="red_orange">#F65C2D</color>
     <color name="green_grey">#D0DFBA</color>
+    <color name="green_dark">#216E24</color>
 </resources>

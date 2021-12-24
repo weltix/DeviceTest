@@ -81,11 +81,10 @@ public class SuCommandsHelper {
         } catch (IOException e) {
             Log.e(TAG, "executeCmd IOException Error: " + e.getMessage());
             result = "ERROR";
-
         } catch (InterruptedException e) {
             Log.e(TAG, "executeCmd InterruptedException Error: " + e.getMessage());
             result = "ERROR";
-
+            Thread.currentThread().interrupt();
         } finally {
             if (reader != null) {
                 try {
@@ -93,7 +92,6 @@ public class SuCommandsHelper {
                 } catch (IOException e) {
                     e.printStackTrace();
                     result = "ERROR";
-
                 }
             }
             if (outputStream != null) {
