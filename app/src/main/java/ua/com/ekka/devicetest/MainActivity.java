@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
     private TextView textViewTestStatus;
+    private ProgressBar progressBar;
     private TextView textViewNowTestedCom;
     private TextView textViewNowTestedBaudrate;
     private TextView textViewTestResult;
@@ -85,9 +87,10 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         buttonStop.setEnabled(true);
                         textViewTestStatus.setText(getString(R.string.testing_now));
-                        textViewNowTestedCom.setText("COM" + comNum_);
-                        textViewNowTestedBaudrate.setText(obj0[1]);
+                        textViewNowTestedCom.setText("порт:          COM" + comNum_);
+                        textViewNowTestedBaudrate.setText("скорость: " + obj0[1]);
                         textViewTestStatus.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.VISIBLE);
                         textViewNowTestedCom.setVisibility(View.VISIBLE);
                         textViewNowTestedBaudrate.setVisibility(View.VISIBLE);
                     });
@@ -159,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonStop.setEnabled(false);
                 buttonStart.setEnabled(true);
                 textViewTestStatus.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.INVISIBLE);
                 textViewNowTestedCom.setVisibility(View.INVISIBLE);
                 textViewNowTestedBaudrate.setVisibility(View.INVISIBLE);
                 textViewTestStatus.setText("");
@@ -227,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
         radioButtonCom2.setOnClickListener(radioButtonClickListener);
 
         textViewTestStatus = findViewById(R.id.textview_test_status);
+        progressBar = findViewById(R.id.progressBar);
         textViewNowTestedCom = findViewById(R.id.textview_now_testing_com);
         textViewNowTestedBaudrate = findViewById(R.id.textview_now_testing_baudrate);
         textViewTestResult = findViewById(R.id.textview_test_result);
