@@ -1,15 +1,22 @@
 <resources>
     <string name="app_name">Device Test</string>
 
-    <string name="test_with_plug">Тест COM порта с заглушкой (линии 2-3, 4-6)</string>
-    <string name="error_opening_com_port">Ошибка открытия порта \"СOM%d\"</string>
-    <string name="error_writing_to_com_port">Ошибка записи в порт \"СOM%d\"</string>
-    <string name="error_reading_from_com_port">Ошибка чтения из СOM порта</string>
-    <string name="test_plug_not_connected">Заглушка для теста не подключена (COM%d)</string>
-    <string name="com_n_dont_pass_test_rxd_txd">Порт \"COM%d\" не прошёл тест по RXD-TXD</string>
-    <string name="com_n_dont_pass_test_dtr_dsr">Порт \"COM%d\" не прошёл тест по DTR-DSR</string>
+    <string name="test_com_port">Тест COM порта</string>
+
     <string name="testing_now">Сейчас тестируется</string>
+    <string name="baudrates_descending_order">Скоростя в порядке убывания</string>
     <string name="com_1">COM1</string>
     <string name="com_2">COM2</string>
-    <string name="com_n_pass_test_successfully">Порт \"COM%d\" прошёл тест успешно</string>
+    <string name="com_n_pass_test_successfully">Успешный тест (COM%d)</string>
+    <string name="start">START</string>
+    <string name="stop">STOP</string>
+    <string name="test_with_plug_description">* На заглушке для тестов должны быть перемычки на линиях 2-3 (RXD-TXD), 4-6 (DTR-DSR)</string>
+
+    <string name="error_opening_com_port">Ошибка открытия порта (COM%d, %s)</string>
+    <string name="error_writing_to_com_port">Ошибка записи в порт (COM%d, %s)</string>
+    <string name="error_reading_from_com_port">Ошибка чтения из СOM порта</string>
+    <string name="test_plug_not_connected">Заглушка для теста не подключена (COM%d, %d)</string>
+    <string name="error_testing_rxd_txd">Ошибка теста линий RXD-TXD (COM%d, %d)</string>
+    <string name="error_testing_dtr_dsr">Ошибка теста линий DTR-DSR (COM%d, %d)</string>
+    <string name="error_testing_rxd_txd_dtr_dsr">Ошибка теста линий и RXD-TXD, и DTR-DSR (COM%d, %d)</string>
 </resources>

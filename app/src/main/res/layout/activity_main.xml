@@ -9,7 +9,7 @@
     tools:context=".MainActivity">
 
     <RadioGroup
-        android:id="@+id/radioGroup"
+        android:id="@+id/radio_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
@@ -52,12 +52,12 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup"
+        app:layout_constraintTop_toBottomOf="@+id/radio_group"
         tools:text="@string/testing_now"
         tools:visibility="visible" />
 
     <ProgressBar
-        android:id="@+id/progressBar"
+        android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -95,16 +95,19 @@
 
     <TextView
         android:id="@+id/textview_test_result"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="60dp"
         android:layout_marginBottom="16dp"
-        android:text="Test result"
+        android:textAlignment="center"
         android:textSize="58sp"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/button_start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_now_testing_baudrate"
+        tools:text="Test result"
         tools:visibility="visible" />
 
     <Button
@@ -113,7 +116,7 @@
         android:layout_width="300dp"
         android:layout_height="126dp"
         android:layout_marginBottom="48dp"
-        android:text="START"
+        android:text="@string/start"
         android:textSize="34sp"
         app:backgroundTint="@color/button_start_color"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -127,7 +130,7 @@
         android:layout_width="300dp"
         android:layout_height="126dp"
         android:enabled="false"
-        android:text="STOP"
+        android:text="@string/stop"
         android:textSize="34sp"
         app:backgroundTint="@color/button_stop_color"
         app:layout_constraintBottom_toBottomOf="@+id/button_start"
@@ -136,15 +139,26 @@
         app:layout_constraintStart_toEndOf="@+id/button_start" />
 
     <CheckBox
-        android:id="@+id/checkBoxBaudratesDirection"
+        android:id="@+id/checkbox_baudrates_direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
+        android:layout_marginStart="130dp"
         android:scaleX="1.5"
         android:scaleY="1.5"
-        android:text="Скоростя в порядке убывания"
+        android:text="@string/baudrates_descending_order"
         android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@+id/radioGroup"
-        app:layout_constraintTop_toTopOf="@+id/radioGroup" />
+        app:layout_constraintStart_toEndOf="@+id/radio_group"
+        app:layout_constraintTop_toTopOf="@+id/radio_group" />
+
+    <TextView
+        android:id="@+id/textview_test_with_plug_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/test_with_plug_description"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_start" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

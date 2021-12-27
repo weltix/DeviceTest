@@ -3,6 +3,8 @@ package ua.com.ekka.devicetest;
 import static ua.com.ekka.devicetest.uart.UartWorker.baudrates;
 
 import android.Manifest;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.os.Build;
@@ -112,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     if (errorCode == 0) {
                         testingThread.interrupt();  // better here, not for all UartWorker.EVENT_UART_ERROR, for case if in future will be added error event, that no need this method to call
                         runOnUiThread(() -> {
-                            displayFailTestResult(String.format(getString(R.string.error_opening_com_port), comNum__));
+                            displayFailTestResult(String.format(getString(R.string.error_opening_com_port), comNum__, obj2[1]));
                             new Handler().postDelayed(() -> {
                                 textViewTestResult.setVisibility(View.INVISIBLE);
                                 buttonStop.performClick();
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     } else if (errorCode == 1) {
                         testingThread.interrupt();  // better here, not for all UartWorker.EVENT_UART_ERROR, for case if in future will be added error event, that no need this method to call
                         runOnUiThread(() -> {
-                            displayFailTestResult(String.format(getString(R.string.error_writing_to_com_port), comNum__));
+                            displayFailTestResult(String.format(getString(R.string.error_writing_to_com_port), comNum__, obj2[1]));
                             new Handler().post(() -> buttonStop.performClick());
                         });
                     }
@@ -151,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         Button button = (Button) v;
         switch (button.getId()) {
             case R.id.button_start:
+                logger.info("onClick() button_start");
                 buttonStart.setEnabled(false);
                 textViewTestResult.setVisibility(View.INVISIBLE);
                 textViewTestResult.setText("");
@@ -161,11 +164,11 @@ public class MainActivity extends AppCompatActivity {
                 runTest(selectedComNum);
                 break;
             case R.id.button_stop:
+                logger.info("onClick() button_stop");
                 if (testingThread != null)
                     testingThread.interrupt();
                 uartWorker.closePort();
                 buttonStop.setEnabled(false);
-                buttonStart.setEnabled(true);
                 checkBoxBaudratesDirection.setEnabled(true);
                 textViewTestStatus.setVisibility(View.INVISIBLE);
                 progressBar.setVisibility(View.INVISIBLE);
@@ -174,6 +177,15 @@ public class MainActivity extends AppCompatActivity {
                 textViewTestStatus.setText("");
                 textViewNowTestedCom.setText("");
                 textViewNowTestedBaudrate.setText("");
+                new Thread(() -> {
+                    try {
+                        while (testingThread.isAlive()) {
+                            Thread.currentThread().sleep(70);
+                        }
+                    } catch (InterruptedException | NullPointerException e) {
+                    }
+                    runOnUiThread(() -> buttonStart.setEnabled(true));
+                }).start();
                 break;
             default:
                 break;
@@ -236,9 +248,9 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radioButtonCom2 = findViewById(R.id.radio_button_com_2);
         radioButtonCom2.setOnClickListener(radioButtonClickListener);
 
-        checkBoxBaudratesDirection = findViewById(R.id.checkBoxBaudratesDirection);
+        checkBoxBaudratesDirection = findViewById(R.id.checkbox_baudrates_direction);
         textViewTestStatus = findViewById(R.id.textview_test_status);
-        progressBar = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progress_bar);
         textViewNowTestedCom = findViewById(R.id.textview_now_testing_com);
         textViewNowTestedBaudrate = findViewById(R.id.textview_now_testing_baudrate);
         textViewTestResult = findViewById(R.id.textview_test_result);
@@ -260,7 +272,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        uartWorker.closePort();  // for case if we start "com.resonance.cashdisplay" straightaway, and port necessary COM port may be still busy
         logger.info("onDestroy()");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setComponent(new ComponentName("com.resonance.cashdisplay", "com.resonance.cashdisplay.MainActivity"));
+        startActivity(intent);
+        System.exit(0);
     }
 
     private void displayFailTestResult(String msg) {
@@ -290,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
                 Arrays.sort(baudratesCopy, Collections.reverseOrder());
 
             for (int currentBaudrate : baudratesCopy) {
-                String resultTestString = "";  // all or nothing - either this string remains empty (or become null), or it will receive full complete testing string
+                String receivedTestStringFinal = "";  // all or nothing - either this string remains empty (or become null), or it will receive full complete testing string
                 receivedTestStringBuilder.setLength(0);
                 receivedTestStringBuilder.trimToSize();
                 blockingQueueForReceivedTestString.clear();
@@ -298,41 +320,51 @@ public class MainActivity extends AppCompatActivity {
                 uartWorker.openPort(selectedComNum, currentBaudrate);
                 uartWorker.sendData(sendingTestString);
                 try {
-                    resultTestString = blockingQueueForReceivedTestString.poll(7000, TimeUnit.MILLISECONDS);
+                    receivedTestStringFinal = blockingQueueForReceivedTestString.poll(7000, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
                 boolean isDtrDsrTestPassed = (uartWorker.getDTR() == uartWorker.getDSR());
                 uartWorker.closePort();
+                isDtrDsrTestPassed = (uartWorker.getDTR() == uartWorker.getDSR()) && isDtrDsrTestPassed;
 
                 if (Thread.currentThread().isInterrupted()) {  // case when UartWorker.EVENT_UART_ERROR message received by uartEventsHandler
                     return;
                 }
-
                 int realReceivedLength = receivedTestStringBuilder.length();
+                logger.debug("realReceivedLength=" + realReceivedLength + " (expect " + sendingTestString.length() + ")");
+                logger.debug("sendingTestString.equals(receivedTestStringFinal)=" + sendingTestString.equals(receivedTestStringFinal));
+                logger.debug("isDtrDsrTestPassed=" + isDtrDsrTestPassed);
                 if (realReceivedLength == 0 && !isDtrDsrTestPassed) {
                     runOnUiThread(() -> {
-                        displayFailTestResult(String.format(getString(R.string.test_plug_not_connected), selectedComNum));
+                        displayFailTestResult(String.format(getString(R.string.test_plug_not_connected), selectedComNum, currentBaudrate));
                         buttonStop.performClick();
                     });
-                    logger.error(String.format("Plug inputStream not connected to COM%d obviously", selectedComNum));
+                    logger.error(String.format("Test plug not connected (COM%d, %d)", selectedComNum, currentBaudrate));
                     return;
-                } else if (!sendingTestString.equals(resultTestString)) {
+                } else if (!sendingTestString.equals(receivedTestStringFinal) && !isDtrDsrTestPassed) {
                     runOnUiThread(() -> {
-                        displayFailTestResult(String.format(getString(R.string.com_n_dont_pass_test_rxd_txd), selectedComNum));
+                        displayFailTestResult(String.format(getString(R.string.error_testing_rxd_txd_dtr_dsr), selectedComNum, currentBaudrate));
                         buttonStop.performClick();
                     });
-                    logger.error(String.format("COM%d fails test RxD-TxD", selectedComNum));
+                    logger.error(String.format("Error testing both: RXD-TXD and DTR-DSR lines (COM%d, %d)", selectedComNum, currentBaudrate));
+                    return;
+                } else if (!sendingTestString.equals(receivedTestStringFinal)) {
+                    runOnUiThread(() -> {
+                        displayFailTestResult(String.format(getString(R.string.error_testing_rxd_txd), selectedComNum, currentBaudrate));
+                        buttonStop.performClick();
+                    });
+                    logger.error(String.format("Error testing RXD-TXD lines (COM%d, %d)", selectedComNum, currentBaudrate));
                     return;
                 } else if (!isDtrDsrTestPassed) {
                     runOnUiThread(() -> {
-                        displayFailTestResult(String.format(getString(R.string.com_n_dont_pass_test_dtr_dsr), selectedComNum));
+                        displayFailTestResult(String.format(getString(R.string.error_testing_dtr_dsr), selectedComNum, currentBaudrate));
                         buttonStop.performClick();
                     });
-                    logger.error(String.format("COM%d fails test DTR-DSR", selectedComNum));
+                    logger.error(String.format("Error testing DTR-DSR lines (COM%d, %d)", selectedComNum, currentBaudrate));
                     return;
                 }
-//                if (sendingTestString.equals(resultTestString))
+//                if (sendingTestString.equals(receivedTestStringFinal))
 //                    logger.warn(String.format("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOK COM%d %d", selectedComNum, currentBaudrate));
             }
 
