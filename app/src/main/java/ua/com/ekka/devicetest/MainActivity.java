@@ -6,6 +6,7 @@ import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -33,6 +35,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -225,11 +228,7 @@ public class MainActivity extends AppCompatActivity {
                     SuCommandsHelper.executeCmd("input tap 1165 560", 0);  // don't use timeout here; tap is executed near 1300ms, and this time is enough for system dialog to be opened completely, and confirm button become visible
                 else                       // 10' "res_px30"
                     SuCommandsHelper.executeCmd("input tap 845 445", 0);   // don't use timeout here; tap is executed near 1300ms, and this time is enough for system dialog to be opened completely, and confirm button become visible
-                try {
-                    Thread.sleep(1000);  // here Android needs at least 100ms to save granted permission
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "onCreate(), " + e.toString());
-                }
+                System.exit(0);     // workaround - app restarts again (don't know why, but it works)
             } else {
                 Log.i(TAG, "onCreate(), permission was already granted");
             }
@@ -281,8 +280,16 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setComponent(new ComponentName("com.resonance.cashdisplay", "com.resonance.cashdisplay.MainActivity"));
-        startActivity(intent);
-        System.exit(0);
+        PackageManager packageManager = getPackageManager();
+        List<ResolveInfo> activities = packageManager.queryIntentActivities(intent, 0);
+        boolean isIntentSafe = activities.size() > 0;
+        if (isIntentSafe) {
+            startActivity(intent);
+            System.exit(0);
+        } else {
+            Toast.makeText(this, "Приложение \"Индикатор клиента\" не будет запущено, поскольку отсутствует в системе", Toast.LENGTH_SHORT).show();
+            logger.warn("Package com.resonance.cashdisplay couldn't run because is absent in system");
+        }
     }
 
     private void displayFailTestResult(String msg) {
