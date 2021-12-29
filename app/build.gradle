@@ -14,16 +14,16 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        applicationVariants.all{
+        applicationVariants.all {
             variant ->
-                variant.outputs.each{
-                    output->
+                variant.outputs.each {
+                    output ->
                         project.ext { appName = 'DeviceTest-' + defaultConfig.versionCode }
 //                        def formattedDate = new Date().format('yyyy-MM-dd-HH-mm-ss')
                         def newName = output.outputFile.name
                         newName = newName.replace("app-", "$project.ext.appName-")
 //                        newName = newName.replace("-release", "-release-" + formattedDate)
-                        output.outputFileName  = newName
+                        output.outputFileName = newName
                 }
         }
     }

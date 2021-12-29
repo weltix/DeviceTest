@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ua.com.ekka.devicetest.uart;
+package android.serialport;
 
 import android.util.Log;
 

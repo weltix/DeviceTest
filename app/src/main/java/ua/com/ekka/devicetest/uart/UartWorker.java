@@ -6,6 +6,7 @@ import static ua.com.ekka.devicetest.MainActivity.PRODUCT_RES_RK3399;
 
 import android.os.Build;
 import android.os.Handler;
+import android.serialport.SerialPort;
 
 import org.apache.log4j.Logger;
 
