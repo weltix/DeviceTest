@@ -21,7 +21,6 @@ import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -287,8 +286,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             System.exit(0);
         } else {
-            Toast.makeText(this, "Приложение \"Индикатор клиента\" не будет запущено, поскольку отсутствует в системе", Toast.LENGTH_SHORT).show();
-            logger.warn("Package com.resonance.cashdisplay couldn't run because is absent in system");
+            logger.warn("Try but fails to launch package com.resonance.cashdisplay, because it is absent in system");
         }
     }
 
