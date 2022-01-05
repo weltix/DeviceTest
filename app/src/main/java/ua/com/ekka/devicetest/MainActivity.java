@@ -111,6 +111,9 @@ public class MainActivity extends AppCompatActivity {
         }
         logger.info("onCreate(), screen size x:" + sizeScreen.x + ", y:" + sizeScreen.y);
 
+        TextView textViewAppVersionName = findViewById(R.id.textview_app_version_name);
+        textViewAppVersionName.setText("v" + BuildConfig.VERSION_NAME);
+
         buttonTestComPort = findViewById(R.id.button_test_com_port);
         buttonTestTouchScreen = findViewById(R.id.button_test_touch_screen);
 

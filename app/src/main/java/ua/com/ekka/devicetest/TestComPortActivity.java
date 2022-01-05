@@ -45,14 +45,14 @@ public class TestComPortActivity extends AppCompatActivity {
     private Button buttonStart;
     private Button buttonStop;
 
-    private int selectedRadioButtonComId = R.id.radio_button_com_1;
+    private int selectedRadioButtonComId;
 
     private UartWorker uartWorker;
 
     private Thread testingThread;
     private String sendingTestString;
-    private BlockingQueue<String> blockingQueueForReceivedTestString = new ArrayBlockingQueue<>(1);
-    private StringBuilder receivedTestStringBuilder = new StringBuilder();
+    private BlockingQueue<String> blockingQueueForReceivedTestString;
+    private StringBuilder receivedTestStringBuilder;
 
     private static HandlerThread uartEventsHandlerThread = new HandlerThread("uartEventsHandlerThread");
 
@@ -192,6 +192,8 @@ public class TestComPortActivity extends AppCompatActivity {
         RadioButton radioButtonCom2 = findViewById(R.id.radio_button_com_2);
         radioButtonCom2.setOnClickListener(radioButtonClickListener);
 
+        selectedRadioButtonComId = R.id.radio_button_com_1;
+
         checkBoxBaudratesDirection = findViewById(R.id.checkbox_baudrates_direction);
         textViewTestStatus = findViewById(R.id.textview_test_status);
         progressBar = findViewById(R.id.progress_bar);
@@ -203,6 +205,9 @@ public class TestComPortActivity extends AppCompatActivity {
 
         buttonStart.setOnClickListener(buttonClickListener);
         buttonStop.setOnClickListener(buttonClickListener);
+
+        blockingQueueForReceivedTestString = new ArrayBlockingQueue<>(1);
+        receivedTestStringBuilder = new StringBuilder();
 
         uartWorker = new UartWorker(uartEventsHandler);
     }
