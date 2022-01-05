@@ -9,7 +9,7 @@ android {
         applicationId 'ua.com.ekka.devicetest'
         minSdk 19
         targetSdk 31
-        versionCode 3
+        versionCode 4
         versionName "1.0.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -54,6 +54,12 @@ android {
             versionNameSuffix "-debug"
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+        }
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 

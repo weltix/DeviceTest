@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.265625" />
+        <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_com_port.xml" value="0.22578125" />
         <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="..\:/Programming/Android/TestRS232/app/src/main/res/layout/activity_main.xml" value="0.1" />
       </map>
