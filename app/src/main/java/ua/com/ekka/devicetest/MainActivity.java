@@ -12,15 +12,23 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import org.apache.log4j.Logger;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
@@ -37,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Button buttonTestComPort;
     private Button buttonTestTouchScreen;
+
+    private Timer clockTimer;
 
     // Register the permissions callback, which handles the user's response to the system permissions dialog.
     private ActivityResultLauncher<String> requestPermissionLauncher =
@@ -106,6 +116,10 @@ public class MainActivity extends AppCompatActivity {
 
         buttonTestComPort.setOnClickListener(buttonClickListener);
         buttonTestTouchScreen.setOnClickListener(buttonClickListener);
+
+        DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
+        DateFormat dateFormat1 = new SimpleDateFormat("dd.MM.yyyy HH mm", new Locale("uk"));
+        startClock(dateFormat0, dateFormat1);
     }
 
     @Override
@@ -117,6 +131,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (clockTimer != null) {
+            clockTimer.cancel();
+            clockTimer = null;
+        }
         logger.info("onDestroy()");
     }
 
@@ -133,6 +151,42 @@ public class MainActivity extends AppCompatActivity {
             System.exit(0);
         } else {
             logger.warn("Try but fails to launch package com.resonance.cashdisplay, because it is absent in system");
+        }
+    }
+
+    /**
+     * Provides clock.
+     * Every 500ms specified TextView will set text, provided in arguments to this method:
+     * arg1 - arg2 - arg1 - arg2 ....
+     * If second argument == null, then only 1-st argument will change specified TextView:
+     * arg1 - arg1 - arg1 - arg1 ....
+     *
+     * @param dateFormat0 main format, must be present necessarily;
+     * @param dateFormat1 is optional, and may be equal {@code null}.
+     */
+    protected void startClock(DateFormat dateFormat0, @Nullable DateFormat dateFormat1) {
+        if (clockTimer == null) {
+            clockTimer = new Timer();
+            TextView textViewDateTime = findViewById(R.id.textview_date_time);
+            Date date = new Date(System.currentTimeMillis());
+            clockTimer.scheduleAtFixedRate(new TimerTask() {
+                boolean flip = true;
+
+                @Override
+                public void run() {
+                    date.setTime(System.currentTimeMillis());
+                    if (flip) {
+                        textViewDateTime.post(() ->
+                                textViewDateTime.setText(dateFormat0.format(date)));
+                        if (dateFormat1 == null)
+                            return;
+                    } else {
+                        textViewDateTime.post(() ->
+                                textViewDateTime.setText(dateFormat1.format(date)));
+                    }
+                    flip = !flip;
+                }
+            }, 0, 500);
         }
     }
 }
