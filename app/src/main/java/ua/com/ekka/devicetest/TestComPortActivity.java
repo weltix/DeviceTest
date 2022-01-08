@@ -5,6 +5,7 @@ import static ua.com.ekka.devicetest.uart.UartWorker.baudrates;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,13 +55,14 @@ public class TestComPortActivity extends AppCompatActivity {
     private BlockingQueue<String> blockingQueueForReceivedTestString;
     private StringBuilder receivedTestStringBuilder;
 
-    private static HandlerThread uartEventsHandlerThread = new HandlerThread("uartEventsHandlerThread");
+    private Handler uartEventsHandler;
+    private HandlerThread uartEventsHandlerThread;
 
-    static {
-        uartEventsHandlerThread.start();
-    }
+    private class UartEventsHandler extends Handler {
+        public UartEventsHandler(Looper looper) {
+            super(looper);
+        }
 
-    private Handler uartEventsHandler = new Handler(uartEventsHandlerThread.getLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -116,7 +118,7 @@ public class TestComPortActivity extends AppCompatActivity {
                     break;
             }
         }
-    };
+    }
 
     private View.OnClickListener radioButtonClickListener = v -> {
         RadioButton radioButton = (RadioButton) v;
@@ -209,6 +211,9 @@ public class TestComPortActivity extends AppCompatActivity {
         blockingQueueForReceivedTestString = new ArrayBlockingQueue<>(1);
         receivedTestStringBuilder = new StringBuilder();
 
+        uartEventsHandlerThread = new HandlerThread("uartEventsHandlerThread");
+        uartEventsHandlerThread.start();
+        uartEventsHandler = new UartEventsHandler(uartEventsHandlerThread.getLooper());
         uartWorker = new UartWorker(uartEventsHandler);
     }
 
@@ -222,6 +227,7 @@ public class TestComPortActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         buttonStop.performClick();  // close port and stop "testingThread"
+        uartEventsHandlerThread.quitSafely();
         logger.info("onDestroy()");
     }
 

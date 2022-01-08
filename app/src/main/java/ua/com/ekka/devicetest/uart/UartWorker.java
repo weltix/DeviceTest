@@ -82,9 +82,6 @@ public class UartWorker {
     public UartWorker(Handler handler) {
         mHandler = handler;
         switch (Build.PRODUCT) {
-            case PRODUCT_AOSP_DRONE2:
-                serialPorts = SERIAL_PORTS_AOSP_DRONE2;
-                break;
             case PRODUCT_RES_PX30:
                 serialPorts = SERIAL_PORTS_RES_PX30;
                 dtrsDsrs = DTR_DSR_RES_PX30;
@@ -98,6 +95,10 @@ public class UartWorker {
                     initGpioContacts(port);
                 break;
             default:
+                serialPorts = SERIAL_PORTS_AOSP_DRONE2;
+                dtrsDsrs = new HashMap<>();
+                dtrsDsrs.put(SERIAL_PORTS_AOSP_DRONE2[0], new ArrayList<>(Arrays.asList(-1, -1)));  // dummy values as default
+                dtrsDsrs.put(SERIAL_PORTS_AOSP_DRONE2[1], new ArrayList<>(Arrays.asList(-1, -1)));  // dummy values as default
                 break;
         }
     }

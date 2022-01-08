@@ -7,11 +7,11 @@
         <deviceKey>
           <Key>
             <type value="VIRTUAL_DEVICE_PATH" />
-            <value value="C:\Users\User_test\.android\avd\Resonance_14_inch_1920x1080_API_27.avd" />
+            <value value="C:\Users\ASUS\.android\avd\Resonance_10_API_27.avd" />
           </Key>
         </deviceKey>
       </Target>
     </targetSelectedWithDropDown>
-    <timeTargetWasSelectedWithDropDown value="2021-12-09T09:21:36.446046200Z" />
+    <timeTargetWasSelectedWithDropDown value="2022-01-08T18:45:56.683343600Z" />
   </component>
 </project>
