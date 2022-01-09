@@ -9,9 +9,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+import ua.com.ekka.devicetest.BuildConfig;
+
 public class SuCommandsHelper {
 
     private static final String TAG = "SU";
+
+    public static final String CMD_SET_IMMERSIVE_MODE_ON = "settings put global policy_control immersive.full=" + BuildConfig.APPLICATION_ID;  // single command to get immersive mode without any confirmation dialogs and even without reboot (when systemui disabled, there are no any bars anyway) (not have effect in API19 aosp_drone2)
+    public static final String CMD_SET_IMMERSIVE_MODE_OFF = "settings put global policy_control immersive.full=";                              // single command to reset immersive mode (not have effect in API19 aosp_drone2)
 
     private static final String CMD_BUSYBOX_WHOAMI = "busybox whoami";
     private static final String CMD_BUSYBOX_ID = "busybox id -u";
@@ -23,7 +28,7 @@ public class SuCommandsHelper {
         this.mContext = context;
     }
 
-     /**
+    /**
      * Executes command using 'su' process.
      * Without timeout may be situations when command executes even 30sec (abnormal), so sometimes
      * timeout is very useful.

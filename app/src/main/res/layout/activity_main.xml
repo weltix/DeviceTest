@@ -9,32 +9,29 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button_test_com_port"
+        android:id="@+id/button_test_touch_screen"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="300dp"
         android:layout_height="126dp"
         android:layout_marginStart="48dp"
         android:layout_marginTop="48dp"
-        android:text="@string/test_com_port"
+        android:text="@string/touch_screen"
         android:textSize="34sp"
         app:backgroundTint="@color/button_color"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button_test_touch_screen"
+        android:id="@+id/button_test_com_port"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="300dp"
         android:layout_height="126dp"
-        android:enabled="false"
-        android:visibility="invisible"
-        android:text="@string/stop"
+        android:layout_marginStart="48dp"
+        android:text="@string/com_port"
         android:textSize="34sp"
-        app:backgroundTint="@color/button_stop_color"
-        app:layout_constraintBottom_toBottomOf="@+id/button_test_com_port"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/button_test_com_port" />
+        app:backgroundTint="@color/button_color"
+        app:layout_constraintStart_toEndOf="@+id/button_test_touch_screen"
+        app:layout_constraintTop_toTopOf="@+id/button_test_touch_screen" />
 
     <TextView
         android:id="@+id/textview_app_version_name"

@@ -1,7 +1,10 @@
 package ua.com.ekka.devicetest;
 
+import static ua.com.ekka.devicetest.MainActivity.PRODUCT_RES_PX30;
+import static ua.com.ekka.devicetest.MainActivity.PRODUCT_RES_RK3399;
 import static ua.com.ekka.devicetest.uart.UartWorker.baudrates;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -35,7 +38,7 @@ import ua.com.ekka.devicetest.uart.UartWorker;
 public class TestComPortActivity extends AppCompatActivity {
 
     private static final String TAG = TestComPortActivity.class.getSimpleName();
-    public static Logger logger = Log4jHelper.getLogger(TAG);
+    private Logger logger = Log4jHelper.getLogger(TAG);
 
     private CheckBox checkBoxBaudratesDirection;
     private TextView textViewTestStatus;
@@ -43,6 +46,7 @@ public class TestComPortActivity extends AppCompatActivity {
     private TextView textViewNowTestedCom;
     private TextView textViewNowTestedBaudrate;
     private TextView textViewTestResult;
+    private TextView textViewTestComPortOnlyRxdTxd;
     private Button buttonStart;
     private Button buttonStop;
 
@@ -182,9 +186,8 @@ public class TestComPortActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_com_port);
-
         logger.info("onCreate()");
+        setContentView(R.layout.activity_com_port);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -202,6 +205,7 @@ public class TestComPortActivity extends AppCompatActivity {
         textViewNowTestedCom = findViewById(R.id.textview_now_testing_com);
         textViewNowTestedBaudrate = findViewById(R.id.textview_now_testing_baudrate);
         textViewTestResult = findViewById(R.id.textview_test_result);
+        textViewTestComPortOnlyRxdTxd = findViewById(R.id.textview_test_com_port_only_rxd_txd);
         buttonStart = findViewById(R.id.button_start);
         buttonStop = findViewById(R.id.button_stop);
 
@@ -210,6 +214,9 @@ public class TestComPortActivity extends AppCompatActivity {
 
         blockingQueueForReceivedTestString = new ArrayBlockingQueue<>(1);
         receivedTestStringBuilder = new StringBuilder();
+
+        if (!Build.PRODUCT.equals(PRODUCT_RES_PX30) && !Build.PRODUCT.equals(PRODUCT_RES_RK3399))
+            textViewTestComPortOnlyRxdTxd.setVisibility(View.VISIBLE);
 
         uartEventsHandlerThread = new HandlerThread("uartEventsHandlerThread");
         uartEventsHandlerThread.start();
@@ -226,9 +233,9 @@ public class TestComPortActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        logger.info("onDestroy()");
         buttonStop.performClick();  // close port and stop "testingThread"
         uartEventsHandlerThread.quitSafely();
-        logger.info("onDestroy()");
     }
 
     @Override

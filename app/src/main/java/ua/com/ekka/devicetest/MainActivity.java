@@ -35,16 +35,16 @@ import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static Logger logger = null;
     private static final String TAG = MainActivity.class.getSimpleName();
+    private Logger logger = null;
 
     // values of next constants are returned by android.os.Build.PRODUCT
     public static final String PRODUCT_AOSP_DRONE2 = "aosp_drone2";
     public static final String PRODUCT_RES_PX30 = "res_px30";
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
-    private Button buttonTestComPort;
     private Button buttonTestTouchScreen;
+    private Button buttonTestComPort;
 
     private Timer clockTimer;
 
@@ -62,13 +62,15 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener buttonClickListener = v -> {
         Button button = (Button) v;
         switch (button.getId()) {
-            case R.id.button_test_com_port:
-                logger.info("onClick() button_test_com_port");
-                Intent intent = new Intent(this, TestComPortActivity.class);
-                startActivity(intent);
-                break;
             case R.id.button_test_touch_screen:
                 logger.info("onClick() button_test_touch_screen");
+                Intent intent = new Intent(this, TestTouchScreenActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.button_test_com_port:
+                logger.info("onClick() button_test_com_port");
+                intent = new Intent(this, TestComPortActivity.class);
+                startActivity(intent);
                 break;
             default:
                 break;
@@ -134,11 +136,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        logger.info("onDestroy()");
         if (clockTimer != null) {
             clockTimer.cancel();
             clockTimer = null;
         }
-        logger.info("onDestroy()");
     }
 
     @Override

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/app_background"
+    tools:context=".TestTouchScreenActivity">
+
+    <view
+        android:id="@+id/viewDraw"
+        class="ua.com.ekka.devicetest.DrawingView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <Button
+        android:id="@+id/button_exit_touch_test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/exit"
+        app:backgroundTint="@color/button_color"
+        app:layout_constraintBottom_toTopOf="@+id/viewDraw"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_cursor_coordinates" />
+
+    <TextView
+        android:id="@+id/textview_cursor_coordinates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/app_main"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/button_exit_touch_test"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_clear_drawing"
+        tools:text="x: 0, y: 0" />
+
+    <Button
+        android:id="@+id/button_clear_drawing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/clear"
+        app:backgroundTint="@color/button_color"
+        app:layout_constraintBottom_toTopOf="@+id/textview_cursor_coordinates"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewDraw" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
