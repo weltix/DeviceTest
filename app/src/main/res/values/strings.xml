@@ -27,4 +27,8 @@
     <string name="error_testing_rxd_txd">Ошибка теста линий RXD-TXD (COM%d, %d)</string>
     <string name="error_testing_dtr_dsr">Ошибка теста линий DTR-DSR (COM%d, %d)</string>
     <string name="error_testing_rxd_txd_dtr_dsr">Ошибка теста линий и RXD-TXD, и DTR-DSR (COM%d, %d)</string>
+
+    <string name="bootloader">Bootloader</string>
+    <string name="reboot_to_bootloader_dialog_title">Перезагрузка в bootloader</string>
+    <string name="reboot_to_bootloader_dialog_message">Устройство будет перезагружено в bootloader (режим обновления прошивки). Продолжить?</string>
 </resources>

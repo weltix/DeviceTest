@@ -12,7 +12,7 @@
         android:id="@+id/button_test_touch_screen"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="300dp"
-        android:layout_height="126dp"
+        android:layout_height="112dp"
         android:layout_marginStart="48dp"
         android:layout_marginTop="48dp"
         android:text="@string/touch_screen"
@@ -25,13 +25,26 @@
         android:id="@+id/button_test_com_port"
         style="@style/Widget.MaterialComponents.Button"
         android:layout_width="300dp"
-        android:layout_height="126dp"
+        android:layout_height="112dp"
         android:layout_marginStart="48dp"
         android:text="@string/com_port"
         android:textSize="34sp"
         app:backgroundTint="@color/button_color"
         app:layout_constraintStart_toEndOf="@+id/button_test_touch_screen"
         app:layout_constraintTop_toTopOf="@+id/button_test_touch_screen" />
+
+    <Button
+        android:id="@+id/button_reboot_to_bootloader"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="300dp"
+        android:layout_height="72dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/bootloader"
+        android:textColor="@color/green_dark"
+        android:textSize="34sp"
+        app:backgroundTint="@color/button_grey_color"
+        app:layout_constraintBottom_toTopOf="@+id/textview_app_version_name"
+        app:layout_constraintStart_toStartOf="@+id/button_test_touch_screen" />
 
     <TextView
         android:id="@+id/textview_app_version_name"

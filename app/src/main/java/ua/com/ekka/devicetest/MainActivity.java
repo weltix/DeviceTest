@@ -1,5 +1,7 @@
 package ua.com.ekka.devicetest;
 
+import static ua.com.ekka.devicetest.su.SuCommandsHelper.CMD_REBOOT_TO_BOOTLOADER;
+
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import android.widget.TextView;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -45,9 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static Point sizeScreen;
 
-    private Button buttonTestTouchScreen;
-    private Button buttonTestComPort;
-
     private Timer clockTimer;
 
     // Register the permissions callback, which handles the user's response to the system permissions dialog.
@@ -73,6 +73,17 @@ public class MainActivity extends AppCompatActivity {
                 logger.info("onClick() button_test_com_port");
                 intent = new Intent(this, TestComPortActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.button_reboot_to_bootloader:
+                logger.info("onClick() button_reboot_to_bootloader");
+                new AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.reboot_to_bootloader_dialog_title))
+                        .setMessage(getString(R.string.reboot_to_bootloader_dialog_message))
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> {
+                            SuCommandsHelper.executeCmd(CMD_REBOOT_TO_BOOTLOADER, 0);
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
                 break;
             default:
                 break;
@@ -118,11 +129,13 @@ public class MainActivity extends AppCompatActivity {
         TextView textViewAppVersionName = findViewById(R.id.textview_app_version_name);
         textViewAppVersionName.setText("v" + BuildConfig.VERSION_NAME);
 
-        buttonTestComPort = findViewById(R.id.button_test_com_port);
-        buttonTestTouchScreen = findViewById(R.id.button_test_touch_screen);
+        Button buttonTestComPort = findViewById(R.id.button_test_com_port);
+        Button buttonTestTouchScreen = findViewById(R.id.button_test_touch_screen);
+        Button buttonRebootToBootloader = findViewById(R.id.button_reboot_to_bootloader);
 
         buttonTestComPort.setOnClickListener(buttonClickListener);
         buttonTestTouchScreen.setOnClickListener(buttonClickListener);
+        buttonRebootToBootloader.setOnClickListener(buttonClickListener);
 
         DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
         DateFormat dateFormat1 = new SimpleDateFormat("dd.MM.yyyy HH mm", new Locale("uk"));

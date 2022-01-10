@@ -21,6 +21,8 @@ public class SuCommandsHelper {
     public static final String CMD_USER_SETUP_COMPLETE_0 = "settings put secure user_setup_complete 0";  // inactivates navigation buttons "Home" (circle) and "Overview" (square); use with "settings put global policy_control immersive.full=ua.com.ekka.devicetest" to hide all system bars forever (not appears even on touch)
     public static final String CMD_USER_SETUP_COMPLETE_1 = "settings put secure user_setup_complete 1";  // activates navigation buttons "Home" (circle) and "Overview" (square); don't forget to reset "settings put global policy_control immersive.full=" to show all system bars and make they behaviour as it was originally
 
+    public static final String CMD_REBOOT_TO_BOOTLOADER = "reboot bootloader";
+
     private static final String CMD_BUSYBOX_WHOAMI = "busybox whoami";
     private static final String CMD_BUSYBOX_ID = "busybox id -u";
     private static boolean isRooted = false;
