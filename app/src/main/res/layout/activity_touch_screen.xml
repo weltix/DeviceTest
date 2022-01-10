@@ -8,6 +8,18 @@
     android:background="@color/app_background"
     tools:context=".TestTouchScreenActivity">
 
+    <ImageView
+        android:id="@+id/imageview_test_touch_grid"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0.2"
+        android:contentDescription="grid_image"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/grid_1280x800_80x80_black"></ImageView>
+
     <view
         android:id="@+id/viewDraw"
         class="ua.com.ekka.devicetest.DrawingView"

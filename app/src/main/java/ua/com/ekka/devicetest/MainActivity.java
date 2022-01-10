@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_PX30 = "res_px30";
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
+    public static Point sizeScreen;
+
     private Button buttonTestTouchScreen;
     private Button buttonTestComPort;
 
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Get screen dimensions
         Display display = this.getWindowManager().getDefaultDisplay();
-        Point sizeScreen = new Point();
+        sizeScreen = new Point();
         display.getSize(sizeScreen);
         sizeScreen.y += 48;
         if (Build.PRODUCT.equals(PRODUCT_RES_RK3399))
@@ -125,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
         DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
         DateFormat dateFormat1 = new SimpleDateFormat("dd.MM.yyyy HH mm", new Locale("uk"));
         startClock(dateFormat0, dateFormat1);
+
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_OFF, 0);  // if touch test was closed emergency
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_1, 0);   // if touch test was closed emergency
     }
 
     @Override

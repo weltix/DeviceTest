@@ -8,12 +8,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -22,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.apache.log4j.Logger;
 
 import ua.com.ekka.devicetest.log.Log4jHelper;
+import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 public class TestTouchScreenActivity extends AppCompatActivity {
 
@@ -36,17 +39,20 @@ public class TestTouchScreenActivity extends AppCompatActivity {
 
         getSupportActionBar().hide();
 
+        ImageView imageViewTestTouchGrid = findViewById(R.id.imageview_test_touch_grid);
+        Drawable drawableTestTouchGrid = getResources().getDrawable(R.drawable.grid_1280x800_80x80_black);
+        if (MainActivity.sizeScreen.x == 1920)
+            drawableTestTouchGrid = getResources().getDrawable(R.drawable.grid_1920x1080_60x60_black);
+        imageViewTestTouchGrid.setImageDrawable(drawableTestTouchGrid);
+
         TextView textViewCursorCoordinates = findViewById(R.id.textview_cursor_coordinates);
 
         DrawingView drawingView = (DrawingView) findViewById(R.id.viewDraw);
-        drawingView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                int x = Math.round(motionEvent.getX());
-                int y = Math.round(motionEvent.getY());
-                textViewCursorCoordinates.setText(String.format("x: %d, y: %d", x, y));
-                return false;
-            }
+        drawingView.setOnTouchListener((view, motionEvent) -> {
+            int x = Math.round(motionEvent.getX());
+            int y = Math.round(motionEvent.getY());
+            textViewCursorCoordinates.setText(String.format("x: %d, y: %d", x, y));
+            return false;
         });
 
         Button buttonClearDrawing = findViewById(R.id.button_clear_drawing);
@@ -59,6 +65,9 @@ public class TestTouchScreenActivity extends AppCompatActivity {
         buttonExitTouchTest.setOnClickListener(view -> {
             finish();
         });
+
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_ON, 0);
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_0, 0);
     }
 
     @Override
@@ -73,6 +82,8 @@ public class TestTouchScreenActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         logger.info("onDestroy()");
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_OFF, 0);
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_1, 0);
     }
 
     /**
