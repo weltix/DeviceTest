@@ -5,9 +5,11 @@ import static ua.com.ekka.devicetest.su.SuCommandsHelper.CMD_REBOOT_TO_BOOTLOADE
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Point;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +35,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import ua.com.ekka.devicetest.eth.ConnectivityReceiver;
 import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
@@ -47,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
     public static Point sizeScreen;
+
+    private ConnectivityReceiver connectivityReceiver;
 
     private Timer clockTimer;
 
@@ -72,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
             case R.id.button_test_com_port:
                 logger.info("onClick() button_test_com_port");
                 intent = new Intent(this, TestComPortActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.button_test_ethernet:
+                logger.info("onClick() button_test_ethernet");
+                intent = new Intent(this, TestEthernetActivity.class);
                 startActivity(intent);
                 break;
             case R.id.button_reboot_to_bootloader:
@@ -131,10 +141,12 @@ public class MainActivity extends AppCompatActivity {
 
         Button buttonTestComPort = findViewById(R.id.button_test_com_port);
         Button buttonTestTouchScreen = findViewById(R.id.button_test_touch_screen);
+        Button buttonTestEthernet = findViewById(R.id.button_test_ethernet);
         Button buttonRebootToBootloader = findViewById(R.id.button_reboot_to_bootloader);
 
         buttonTestComPort.setOnClickListener(buttonClickListener);
         buttonTestTouchScreen.setOnClickListener(buttonClickListener);
+        buttonTestEthernet.setOnClickListener(buttonClickListener);
         buttonRebootToBootloader.setOnClickListener(buttonClickListener);
 
         DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
@@ -143,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
 
         SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_OFF, 0);  // if touch test was closed emergency
         SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_1, 0);   // if touch test was closed emergency
+
+        connectivityReceiver = new ConnectivityReceiver();
+        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
@@ -155,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         logger.info("onDestroy()");
+        if (connectivityReceiver != null)
+            unregisterReceiver(connectivityReceiver);
         if (clockTimer != null) {
             clockTimer.cancel();
             clockTimer = null;

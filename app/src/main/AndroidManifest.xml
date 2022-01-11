@@ -30,6 +30,10 @@
             android:name=".TestComPortActivity"
             android:label="@string/test_com_port"
             android:launchMode="singleTask"></activity>
+        <activity
+            android:name=".TestEthernetActivity"
+            android:label="@string/test_ethernet"
+            android:launchMode="singleTask"></activity>
     </application>
 
 </manifest>

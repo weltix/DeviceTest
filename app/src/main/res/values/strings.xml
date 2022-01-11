@@ -1,11 +1,13 @@
 <resources>
     <string name="app_name">Device Test</string>
 
-    <string name="touch_screen">Touch screen</string>
-    <string name="com_port">COM порт</string>
+    <string name="touch_screen">Touch</string>
+    <string name="com_port">COM</string>
+    <string name="ethernet">Ethernet</string>
 
-    <string name="test_touch_screen">Тест touch screen</string>
+    <string name="test_touch_screen">Тест touch панели</string>
     <string name="test_com_port">Тест COM порта</string>
+    <string name="test_ethernet">Тест порта Ethernet</string>
 
     <string name="clear">Очистить</string>
     <string name="exit">Выйти</string>
@@ -28,7 +30,9 @@
     <string name="error_testing_dtr_dsr">Ошибка теста линий DTR-DSR (COM%d, %d)</string>
     <string name="error_testing_rxd_txd_dtr_dsr">Ошибка теста линий и RXD-TXD, и DTR-DSR (COM%d, %d)</string>
 
+    <string name="ethernet_params">Параметры Ethernet:</string>
+
     <string name="bootloader">Bootloader</string>
     <string name="reboot_to_bootloader_dialog_title">Перезагрузка в bootloader</string>
-    <string name="reboot_to_bootloader_dialog_message">Устройство будет перезагружено в bootloader (режим обновления прошивки). Продолжить?</string>
+    <string name="reboot_to_bootloader_dialog_message">Устройство будет перезагружено в bootloader режиме (режим обновления прошивки). Продолжить?</string>
 </resources>
