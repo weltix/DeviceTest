@@ -1,10 +1,12 @@
 <resources>
     <string name="app_name">Device Test</string>
 
+    <string name="display">Display</string>
     <string name="touch_screen">Touch</string>
     <string name="com_port">COM</string>
     <string name="ethernet">Ethernet</string>
 
+    <string name="test_display">Тест дисплея</string>
     <string name="test_touch_screen">Тест touch панели</string>
     <string name="test_com_port">Тест COM порта</string>
     <string name="test_ethernet">Тест порта Ethernet</string>

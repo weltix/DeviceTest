@@ -5,9 +5,10 @@
       <map>
         <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.265625" />
         <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_com_port.xml" value="0.5" />
+        <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_display.xml" value="0.5" />
         <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_ethernet.xml" value="0.5609195402298851" />
         <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_main.xml" value="0.5" />
-        <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_touch_screen.xml" value="0.1" />
+        <entry key="..\:/Programming/Android/DeviceTest/app/src/main/res/layout/activity_touch_screen.xml" value="0.33" />
         <entry key="..\:/Programming/Android/TestRS232/app/src/main/res/layout/activity_main.xml" value="0.1" />
       </map>
     </option>

@@ -38,6 +38,8 @@ public class TestTouchScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_touch_screen);
 
         getSupportActionBar().hide();
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_ON, 0);
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_0, 0);
 
         ImageView imageViewTestTouchGrid = findViewById(R.id.imageview_test_touch_grid);
         Drawable drawableTestTouchGrid = getResources().getDrawable(R.drawable.grid_1280x800_80x80_black);
@@ -65,9 +67,6 @@ public class TestTouchScreenActivity extends AppCompatActivity {
         buttonExitTouchTest.setOnClickListener(view -> {
             finish();
         });
-
-        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_ON, 0);
-        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_0, 0);
     }
 
     @Override
@@ -75,7 +74,6 @@ public class TestTouchScreenActivity extends AppCompatActivity {
         super.onResume();
         logger.info("onResume()");
         setImmersiveMode();
-        acceptFullScreenButtonTap();
     }
 
     @Override
@@ -106,20 +104,6 @@ public class TestTouchScreenActivity extends AppCompatActivity {
                                 | View.SYSTEM_UI_FLAG_FULLSCREEN);
                 decorView.invalidate();
             }
-        });
-    }
-
-    /**
-     * Programmatically taps confirm button when immersive mode is called.
-     */
-    @TargetApi(19)
-    private void acceptFullScreenButtonTap() {
-        runOnUiThread(() -> {
-//            logger.debug(TAG, "Size screen before input tap on immersive mode button - x:" + sizeScreen.x + ", y:" + sizeScreen.y);
-//            if (sizeScreen.x == 1920) // 14' "aosp_drone2"
-//                SuCommandsHelper.executeCmd("input tap 1060 170", 2000);
-//            else                      // 10' "aosp_drone2"
-//                SuCommandsHelper.executeCmd("input tap 746 157", 2000);
         });
     }
 }

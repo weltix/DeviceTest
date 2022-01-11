@@ -23,6 +23,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".TestDisplayActivity"
+            android:label="@string/test_display"
+            android:launchMode="singleTask"></activity>
+        <activity
             android:name=".TestTouchScreenActivity"
             android:label="@string/test_touch_screen"
             android:launchMode="singleTask"></activity>

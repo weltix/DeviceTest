@@ -8,6 +8,14 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="grey50_test">#7f7f7f</color>
+    <color name="red_test">#fe0000</color>
+    <color name="green_test">#00ff01</color>
+    <color name="blue_test">#0000fe</color>
+    <color name="cyan_test">#00ffff</color>
+    <color name="magenta_test">#ff00fe</color>
+    <color name="yellow_test">#ffff00</color>
+
     <color name="app_main">#161E43</color>
     <color name="app_main_variant">#2D3971</color>
 

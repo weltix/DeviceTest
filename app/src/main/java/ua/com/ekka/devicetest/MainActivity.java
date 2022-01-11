@@ -69,9 +69,14 @@ public class MainActivity extends AppCompatActivity {
     private View.OnClickListener buttonClickListener = v -> {
         Button button = (Button) v;
         switch (button.getId()) {
+            case R.id.button_test_display:
+                logger.info("onClick() button_test_display");
+                Intent intent = new Intent(this, TestDisplayActivity.class);
+                startActivity(intent);
+                break;
             case R.id.button_test_touch_screen:
                 logger.info("onClick() button_test_touch_screen");
-                Intent intent = new Intent(this, TestTouchScreenActivity.class);
+                intent = new Intent(this, TestTouchScreenActivity.class);
                 startActivity(intent);
                 break;
             case R.id.button_test_com_port:
@@ -136,14 +141,22 @@ public class MainActivity extends AppCompatActivity {
         }
         logger.info("onCreate(), screen size x:" + sizeScreen.x + ", y:" + sizeScreen.y);
 
+        connectivityReceiver = new ConnectivityReceiver();
+        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_OFF, 0);  // if display test or touch test was closed emergency
+        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_1, 0);   // if display test or touch test was closed emergency
+
         TextView textViewAppVersionName = findViewById(R.id.textview_app_version_name);
         textViewAppVersionName.setText("v" + BuildConfig.VERSION_NAME);
 
+        Button buttonTestDisplay = findViewById(R.id.button_test_display);
         Button buttonTestComPort = findViewById(R.id.button_test_com_port);
         Button buttonTestTouchScreen = findViewById(R.id.button_test_touch_screen);
         Button buttonTestEthernet = findViewById(R.id.button_test_ethernet);
         Button buttonRebootToBootloader = findViewById(R.id.button_reboot_to_bootloader);
 
+        buttonTestDisplay.setOnClickListener(buttonClickListener);
         buttonTestComPort.setOnClickListener(buttonClickListener);
         buttonTestTouchScreen.setOnClickListener(buttonClickListener);
         buttonTestEthernet.setOnClickListener(buttonClickListener);
@@ -152,12 +165,6 @@ public class MainActivity extends AppCompatActivity {
         DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
         DateFormat dateFormat1 = new SimpleDateFormat("dd.MM.yyyy HH mm", new Locale("uk"));
         startClock(dateFormat0, dateFormat1);
-
-        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_SET_IMMERSIVE_MODE_OFF, 0);  // if touch test was closed emergency
-        SuCommandsHelper.executeCmd(SuCommandsHelper.CMD_USER_SETUP_COMPLETE_1, 0);   // if touch test was closed emergency
-
-        connectivityReceiver = new ConnectivityReceiver();
-        registerReceiver(connectivityReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
     }
 
     @Override
