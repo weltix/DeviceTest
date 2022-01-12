@@ -331,7 +331,7 @@ public class TestComPortActivity extends AppCompatActivity {
 //                    logger.warn(String.format("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOK COM%d %d", selectedComNum, currentBaudrate));
             }
 
-            if (Thread.currentThread().isInterrupted()) {  // case when UartWorker.EVENT_UART_ERROR message received by uartEventsHandler or
+            if (Thread.currentThread().isInterrupted()) {  // case when UartWorker.EVENT_UART_ERROR message received by uartEventsHandler or buttonStop was clicked
                 return;
             }
 

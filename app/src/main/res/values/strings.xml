@@ -33,6 +33,9 @@
     <string name="error_testing_rxd_txd_dtr_dsr">Ошибка теста линий и RXD-TXD, и DTR-DSR (COM%d, %d)</string>
 
     <string name="ethernet_params">Параметры Ethernet:</string>
+    <string name="ethernet_ping_test_count">пинг %s (%d)</string>
+    <string name="ethernet_ping_test_successful">Успешный пинг</string>
+    <string name="ethernet_ping_test_fails">Неудачный пинг %s (%d)</string>
 
     <string name="bootloader">Bootloader</string>
     <string name="reboot_to_bootloader_dialog_title">Перезагрузка в bootloader</string>

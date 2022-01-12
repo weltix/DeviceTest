@@ -25,9 +25,12 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="12dp"
         android:visibility="invisible"
-        app:layout_constraintStart_toEndOf="@+id/textview_ethernet_params"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/textview_test_result"
+        app:layout_constraintStart_toEndOf="@+id/textview_test_result"
+        app:layout_constraintTop_toTopOf="@+id/textview_test_result"
         tools:visibility="visible" />
 
     <TextView
@@ -62,7 +65,7 @@
 
     <TextView
         android:id="@+id/textview_test_result"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="60dp"
         android:layout_marginEnd="60dp"
@@ -71,9 +74,9 @@
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/button_start"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_gateway"
+        app:layout_constraintVertical_bias="0.513"
         tools:text="Test result"
         tools:visibility="visible" />
 
@@ -99,6 +102,7 @@
         android:enabled="false"
         android:text="@string/stop"
         android:textSize="34sp"
+        android:visibility="gone"
         app:backgroundTint="@color/button_stop_color"
         app:layout_constraintBottom_toBottomOf="@+id/button_start"
         app:layout_constraintEnd_toEndOf="parent"

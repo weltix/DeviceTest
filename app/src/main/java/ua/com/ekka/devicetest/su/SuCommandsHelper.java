@@ -21,6 +21,9 @@ public class SuCommandsHelper {
     public static final String CMD_USER_SETUP_COMPLETE_0 = "settings put secure user_setup_complete 0";  // inactivates navigation buttons "Home" (circle) and "Overview" (square); use with "settings put global policy_control immersive.full=ua.com.ekka.devicetest" to hide all system bars forever (not appears even on touch)
     public static final String CMD_USER_SETUP_COMPLETE_1 = "settings put secure user_setup_complete 1";  // activates navigation buttons "Home" (circle) and "Overview" (square); don't forget to reset "settings put global policy_control immersive.full=" to show all system bars and make they behaviour as it was originally
 
+    public static final String CMD_PING = "ping -c 1 -w 10 ";  // simply concat IP address to this command (-c 1 means one command, -w 10 means wait 10s max)
+    public static final String CMD_IPERF = "iperf -c 192.168.1.2 -t 10 -f -m";  // 192.168.1.2 - iperf server is set up there
+
     public static final String CMD_REBOOT_TO_BOOTLOADER = "reboot bootloader";
 
     private static final String CMD_BUSYBOX_WHOAMI = "busybox whoami";

@@ -1,9 +1,12 @@
 package ua.com.ekka.devicetest;
 
+import static ua.com.ekka.devicetest.su.SuCommandsHelper.CMD_PING;
+
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
@@ -25,6 +28,10 @@ public class TestEthernetActivity extends AppCompatActivity {
     private Button buttonStop;
 
     private TextView textViewTestResult;
+    private ProgressBar progressBar;
+
+    private int pingsCount = 10;
+    private String pingAddress = "192.168.1.1";
 
     private Thread testingThread;
 
@@ -38,6 +45,7 @@ public class TestEthernetActivity extends AppCompatActivity {
                 textViewTestResult.setVisibility(View.INVISIBLE);
                 textViewTestResult.setText("");
                 textViewTestResult.setTextColor(getResources().getColor(R.color.green_dark));
+                progressBar.setVisibility(View.VISIBLE);
                 runTest();
                 break;
             case R.id.button_stop:
@@ -45,13 +53,7 @@ public class TestEthernetActivity extends AppCompatActivity {
                 if (testingThread != null)
                     testingThread.interrupt();
                 buttonStop.setEnabled(false);
-//                textViewTestStatus.setVisibility(View.INVISIBLE);
-//                progressBar.setVisibility(View.INVISIBLE);
-//                textViewNowTestedCom.setVisibility(View.INVISIBLE);
-//                textViewNowTestedBaudrate.setVisibility(View.INVISIBLE);
-//                textViewTestStatus.setText("");
-//                textViewNowTestedCom.setText("");
-//                textViewNowTestedBaudrate.setText("");
+                progressBar.setVisibility(View.INVISIBLE);
                 new Thread(() -> {
                     try {
                         while (testingThread.isAlive()) {
@@ -77,6 +79,7 @@ public class TestEthernetActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         textViewTestResult = findViewById(R.id.textview_test_result);
+        progressBar = findViewById(R.id.progress_bar);
 
         buttonStart = findViewById(R.id.button_start);
         buttonStop = findViewById(R.id.button_stop);
@@ -98,6 +101,8 @@ public class TestEthernetActivity extends AppCompatActivity {
         textViewIp.setText(String.format("         IP: %s", ipSettings.getIp()));
         textViewMask.setText(String.format("маска: %s", ipSettings.getNetmask()));
         textViewGateway.setText(String.format(" шлюз: %s", ipSettings.getGateway()));
+
+        buttonStart.performClick();
 
         logger.debug(ethernetHelper.ipSettings.toString());
     }
@@ -122,27 +127,40 @@ public class TestEthernetActivity extends AppCompatActivity {
     private void runTest() {
         testingThread = new Thread(() -> {
             int pingsCounter = 0;
-            while (!Thread.currentThread().isInterrupted()) {
-                String pingResult = SuCommandsHelper.executeCmd("ping -c 1 -s 50000 192.168.1.1", 1000);  // without timeout may long for 10 seconds if ping fails
+            while (!Thread.currentThread().isInterrupted() && pingsCounter < pingsCount) {
+                String pingResult = SuCommandsHelper.executeCmd(CMD_PING + pingAddress, 0);  // without timeout may long for 10 seconds if ping fails (it is not because of -w 10, simply such behaviour)
                 pingsCounter++;
                 final int pingsCounterFinal = pingsCounter;
-                runOnUiThread(() -> {
-                    if (pingResult.contains("1 received")) {
-                        textViewTestResult.setText(String.format("Тест успешен (пингов: %d)", pingsCounterFinal));
+                if (pingResult.equals("OK")) {
+                    runOnUiThread(() -> {
+                        textViewTestResult.setText(String.format(getString(R.string.ethernet_ping_test_count), pingAddress, pingsCounterFinal));
                         textViewTestResult.setVisibility(View.VISIBLE);
-                    } else if (testingThread.isAlive()) {
+                    });
+                } else {
+                    runOnUiThread(() -> {
                         textViewTestResult.setTextColor(getResources().getColor(R.color.red_orange));
-                        textViewTestResult.setText("Тест неудачен");
+                        textViewTestResult.setText(String.format(getString(R.string.ethernet_ping_test_fails), pingAddress, pingsCounterFinal));
                         textViewTestResult.setVisibility(View.VISIBLE);
                         buttonStop.performClick();
-                    }
-                });
+                    });
+                    logger.error(String.format("Error when testing Ethernet; ping %d from %d", pingsCounterFinal, pingsCount));
+                    return;
+                }
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
+
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
+
+            runOnUiThread(() -> {
+                textViewTestResult.setText(getString(R.string.ethernet_ping_test_successful));
+                buttonStop.performClick();
+            });
         });
         testingThread.start();
     }
