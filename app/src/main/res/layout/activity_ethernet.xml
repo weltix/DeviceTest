@@ -6,6 +6,8 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:background="@color/app_background"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context=".TestEthernetActivity">
 
     <TextView
@@ -34,16 +36,44 @@
         tools:visibility="visible" />
 
     <TextView
+        android:id="@+id/textview_label_ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/ip.."
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.43"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_ethernet_params" />
+
+    <TextView
+        android:id="@+id/textview_label_mask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/mask.."
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="@+id/textview_label_ip"
+        app:layout_constraintTop_toBottomOf="@+id/textview_label_ip" />
+
+    <TextView
+        android:id="@+id/textview_label_gateway"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/gateway.."
+        android:textSize="34sp"
+        app:layout_constraintEnd_toEndOf="@+id/textview_label_mask"
+        app:layout_constraintTop_toBottomOf="@+id/textview_label_mask" />
+
+    <TextView
         android:id="@+id/textview_ip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:textSize="34sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_ethernet_params"
-        tools:text="         IP: 192.168.1.100" />
+        app:layout_constraintStart_toEndOf="@+id/textview_label_ip"
+        app:layout_constraintTop_toTopOf="@+id/textview_label_ip"
+        tools:text="192.168.1.100" />
 
     <TextView
         android:id="@+id/textview_mask"
@@ -52,7 +82,7 @@
         android:textSize="34sp"
         app:layout_constraintStart_toStartOf="@+id/textview_ip"
         app:layout_constraintTop_toBottomOf="@+id/textview_ip"
-        tools:text="маска: 255.255.255.0" />
+        tools:text="255.255.255.0" />
 
     <TextView
         android:id="@+id/textview_gateway"
@@ -61,7 +91,7 @@
         android:textSize="34sp"
         app:layout_constraintStart_toStartOf="@+id/textview_mask"
         app:layout_constraintTop_toBottomOf="@+id/textview_mask"
-        tools:text=" шлюз: 192.168.1.1" />
+        tools:text="192.168.1.1" />
 
     <TextView
         android:id="@+id/textview_test_result"
@@ -75,8 +105,7 @@
         app:layout_constraintBottom_toTopOf="@+id/button_start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_gateway"
-        app:layout_constraintVertical_bias="0.513"
+        app:layout_constraintTop_toBottomOf="@+id/textview_label_gateway"
         tools:text="Test result"
         tools:visibility="visible" />
 
@@ -108,5 +137,58 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/button_start" />
+
+    <TextView
+        android:id="@+id/textview_label_ping_ip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="300dp"
+        android:text="Ping IP:"
+        android:textSize="30sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textview_ethernet_params"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <EditText
+        android:id="@+id/edittext_ping_ip"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:digits="0123456789."
+        android:ems="10"
+        android:hint="Ping IP"
+        android:imeOptions="actionDone"
+        android:inputType="number|numberDecimal"
+        android:paddingTop="0dp"
+        android:paddingBottom="2dp"
+        android:textSize="34sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textview_label_ping_ip"
+        app:layout_constraintStart_toEndOf="@+id/textview_label_ping_ip"
+        tools:text="192.168.254.254" />
+
+    <TextView
+        android:id="@+id/textview_label_ping_n_times"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Ping n="
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="@+id/textview_label_ping_ip"
+        app:layout_constraintTop_toBottomOf="@+id/textview_label_ping_ip" />
+
+    <EditText
+        android:id="@+id/edittext_ping_n_times"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:digits="0123456789"
+        android:ems="10"
+        android:hint="Кол-во ping"
+        android:imeOptions="actionDone"
+        android:inputType="number"
+        android:paddingTop="0dp"
+        android:paddingBottom="2dp"
+        android:textSize="34sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/textview_label_ping_n_times"
+        app:layout_constraintStart_toStartOf="@+id/edittext_ping_ip"
+        tools:text="100" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

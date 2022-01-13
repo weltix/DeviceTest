@@ -37,7 +37,11 @@ public class SuCommandsHelper {
     }
 
     /**
-     * Executes command using 'su' process.
+     * Executes command using 'su' process. 'su' process not responses with "null" (EOF) when any
+     * command finished to execute, rather it wait another command like in terminal. So we can get
+     * only first bytes, that became available to read during timeout, that we specify in parameters.
+     * If there will be another part of data, that will come separately after first read part, it
+     * will be lost, because we already get out from reader.ready() method.
      * Without timeout may be situations when command executes even 30sec (abnormal), so sometimes
      * timeout is very useful.
      *

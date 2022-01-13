@@ -56,7 +56,7 @@ public class EthernetHelper {
         mContext = context;
     }
 
-    public static boolean isValidIP4Address(String ipAddress) {
+    public boolean isValidIP4Address(String ipAddress) {
         if (ipAddress.matches("^(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})$")) {
             String[] groups = ipAddress.split("\\.");
 
@@ -65,7 +65,6 @@ public class EthernetHelper {
                 if (segment == null || segment.length() <= 0) {
                     return false;
                 }
-
                 int value = 0;
                 try {
                     value = Integer.parseInt(segment);

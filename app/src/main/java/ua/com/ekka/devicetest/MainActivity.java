@@ -49,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
     public static final String PRODUCT_RES_PX30 = "res_px30";
     public static final String PRODUCT_RES_RK3399 = "res_rk3399";
 
+    public static String pingIp = "192.168.1.1";  // default initial value for ethernet testing
+    public static int pingsCount = 10;            // default initial value for ethernet testing
+
     public static Point sizeScreen;
 
     private ConnectivityReceiver connectivityReceiver;
@@ -99,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
                             SuCommandsHelper.executeCmd(CMD_REBOOT_TO_BOOTLOADER, 0);
                         })
                         .setNegativeButton(android.R.string.no, null).show();
+                break;
+            case R.id.button_exit_app:
+                exitAppAndCallCashdisplay();
                 break;
             default:
                 break;
@@ -155,12 +161,14 @@ public class MainActivity extends AppCompatActivity {
         Button buttonTestTouchScreen = findViewById(R.id.button_test_touch_screen);
         Button buttonTestEthernet = findViewById(R.id.button_test_ethernet);
         Button buttonRebootToBootloader = findViewById(R.id.button_reboot_to_bootloader);
+        Button buttonExitApp = findViewById(R.id.button_exit_app);
 
         buttonTestDisplay.setOnClickListener(buttonClickListener);
         buttonTestComPort.setOnClickListener(buttonClickListener);
         buttonTestTouchScreen.setOnClickListener(buttonClickListener);
         buttonTestEthernet.setOnClickListener(buttonClickListener);
         buttonRebootToBootloader.setOnClickListener(buttonClickListener);
+        buttonExitApp.setOnClickListener(buttonClickListener);
 
         DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
         DateFormat dateFormat1 = new SimpleDateFormat("dd.MM.yyyy HH mm", new Locale("uk"));
@@ -188,6 +196,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        exitAppAndCallCashdisplay();
+    }
+
+    private void exitAppAndCallCashdisplay() {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setComponent(new ComponentName("com.resonance.cashdisplay", "com.resonance.cashdisplay.MainActivity"));
         PackageManager packageManager = getPackageManager();

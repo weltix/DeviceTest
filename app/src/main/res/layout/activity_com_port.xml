@@ -142,12 +142,12 @@
         android:id="@+id/checkbox_baudrates_direction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="130dp"
+        android:layout_marginEnd="104dp"
         android:scaleX="1.5"
         android:scaleY="1.5"
         android:text="@string/baudrates_descending_order"
         android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@+id/radio_group"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/radio_group" />
 
     <TextView
