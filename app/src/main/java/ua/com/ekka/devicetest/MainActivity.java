@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static String pingIp = "192.168.1.1";  // default initial value for ethernet testing
     public static int pingsCount = 10;            // default initial value for ethernet testing
+    public static String iperfServerIp = "192.168.1.2";  // default initial value for ethernet testing
 
     public static Point sizeScreen;
 

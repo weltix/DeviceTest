@@ -23,7 +23,7 @@ public class SuCommandsHelper {
     public static final String CMD_USER_SETUP_COMPLETE_1 = "settings put secure user_setup_complete 1";  // activates navigation buttons "Home" (circle) and "Overview" (square); don't forget to reset "settings put global policy_control immersive.full=" to show all system bars and make they behaviour as it was originally
 
     public static final String CMD_PING = "ping -c 1 -w 10 ";  // simply concat IP address to this command (-c 1 means one command, -w 10 means wait 10s max)
-    public static final String CMD_IPERF = "iperf -c 192.168.1.2 -t 10 -f -m";  // 192.168.1.2 - iperf server is set up there
+    public static final String CMD_IPERF = "iperf -c %s -t 10 -f -m";  // %s = 192.168.1.2 (may be any other) - iperf server is set up there
 
     public static final String CMD_REBOOT_TO_BOOTLOADER = "reboot bootloader";
 
@@ -129,13 +129,17 @@ public class SuCommandsHelper {
      * Method executes the specified program in separate native process.
      * Must be called only from thread other than UI thread, because may block calling thread by
      * BufferedReader.readLine() method for unpredictable period of time.
+     *
      * @param cmd the name of the program to execute
      * @return response of program
      */
     public static String executeCmdBlocking(String cmd) {
         boolean isMainThread = Thread.currentThread().equals(Looper.getMainLooper().getThread());
         if (isMainThread)
-            return "executeCmdBlocking() method cannot be called from UI thread.";
+            return String.format("%s.%s method cannot be called from UI thread",
+                    SuCommandsHelper.class.getSimpleName(),
+                    new Object() {
+                    }.getClass().getEnclosingMethod().getName());
 
         StringBuilder response = new StringBuilder();
         try {
@@ -150,6 +154,7 @@ public class SuCommandsHelper {
             in.close();
         } catch (IOException e) {
             Log.e(TAG, e.toString());
+            return e.getMessage();
         }
         return response.toString();
     }
