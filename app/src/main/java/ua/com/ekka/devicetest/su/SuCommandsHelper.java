@@ -1,6 +1,7 @@
 package ua.com.ekka.devicetest.su;
 
 import android.content.Context;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -122,6 +123,35 @@ public class SuCommandsHelper {
             }
         }
         return result;
+    }
+
+    /**
+     * Method executes the specified program in separate native process.
+     * Must be called only from thread other than UI thread, because may block calling thread by
+     * BufferedReader.readLine() method for unpredictable period of time.
+     * @param cmd the name of the program to execute
+     * @return response of program
+     */
+    public static String executeCmdBlocking(String cmd) {
+        boolean isMainThread = Thread.currentThread().equals(Looper.getMainLooper().getThread());
+        if (isMainThread)
+            return "executeCmdBlocking() method cannot be called from UI thread.";
+
+        StringBuilder response = new StringBuilder();
+        try {
+            Runtime r = Runtime.getRuntime();
+            Process p = r.exec(cmd);
+            BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                Log.w(TAG, inputLine);
+                response.append(inputLine);
+            }
+            in.close();
+        } catch (IOException e) {
+            Log.e(TAG, e.toString());
+        }
+        return response.toString();
     }
 
     private static SetupRootCallback setupRootCallback;
