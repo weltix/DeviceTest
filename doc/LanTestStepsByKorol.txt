@@ -2,6 +2,7 @@
 
 2. файлик тестовый:
 wget http://192.168.1.2/nettest.dat -O TMPFILENAME -t 5 -T 2
+(busybox wget http://192.168.1.2/nettest.dat -O /storage/emulated/0/tmpFile -t 5 -T 2)
 его размер должен быть 8227664, а MD5 hash '552dbaaf8e83c5159adee673ffe200aa'
 
 3. iperf -c 192.168.1.2 -t 10 -f -m

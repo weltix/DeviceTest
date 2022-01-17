@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 import ua.com.ekka.devicetest.BuildConfig;
+import ua.com.ekka.devicetest.MainActivity;
 
 public class SuCommandsHelper {
 
@@ -129,6 +130,8 @@ public class SuCommandsHelper {
      * Method executes the specified program in separate native process.
      * Must be called only from thread other than UI thread, because may block calling thread by
      * BufferedReader.readLine() method for unpredictable period of time.
+     * May return nothing on some devices (like on {@link MainActivity#PRODUCT_RES_PX30}, where
+     * only 'sh' or 'su' is needed).
      *
      * @param cmd the name of the program to execute
      * @return response of program
@@ -141,8 +144,10 @@ public class SuCommandsHelper {
                     new Object() {
                     }.getClass().getEnclosingMethod().getName());
 
+        long startTime = System.nanoTime();
         StringBuilder response = new StringBuilder();
         try {
+            Log.w(TAG + " blocking", "BEGIN CMD: " + cmd);
             Runtime r = Runtime.getRuntime();
             Process p = r.exec(cmd);
             BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -156,6 +161,7 @@ public class SuCommandsHelper {
             Log.e(TAG, e.toString());
             return e.getMessage();
         }
+        Log.w(TAG + " blocking", "END CMD:   " + cmd + "\nTIME:   " + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime) + "ms\nRESULT: " + response.toString());
         return response.toString();
     }
 

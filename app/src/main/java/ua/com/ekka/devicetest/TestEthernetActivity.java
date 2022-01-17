@@ -265,7 +265,9 @@ public class TestEthernetActivity extends AppCompatActivity {
             }
 
             String iperfResult = SuCommandsHelper.executeCmdBlocking(String.format(CMD_IPERF, iperfServerIp));
-            if (iperfResult.contains("Working Directory: null")) {  // probably iperf is absent in system
+            if (iperfResult.isEmpty()                                           // probably current device cannot execute SuCommandsHelper.executeCmdBlocking() correctly
+                    || iperfResult.contains("Working Directory: null")          // probably iperf is absent in system
+                    || iperfResult.contains("Cannot run program \"iperf\"")) {  // probably iperf is absent in system
                 runOnUiThread(() -> {
                     textViewTestResult.setText(getString(R.string.ethernet_test_successful_wo_iperf));
                     buttonStop.performClick();

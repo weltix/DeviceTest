@@ -40,7 +40,7 @@
     <string name="ethernet_test_successful_wo_iperf">Успешный тест (без iperf)</string>
     <string name="ethernet_test_successful">Успешный тест</string>
     <string name="ethernet_ping_test_fails">Неудачный ping %s (%d)</string>
-    <string name="error_test_iperf">Ошибка теста iperf</string>
+    <string name="error_test_iperf">Ошибка теста iperf (ping OK)</string>
     <string name="error_test_iperf_low_bandwidth">Ошибка теста iperf: bandwidth=%.1f</string>
 
     <string name="bootloader">Bootloader</string>
