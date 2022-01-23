@@ -1,10 +1,8 @@
 package ua.com.ekka.devicetest;
 
-import static ua.com.ekka.devicetest.MainActivity.iperfServerIp;
 import static ua.com.ekka.devicetest.MainActivity.pingIp;
 import static ua.com.ekka.devicetest.MainActivity.pingsCount;
 import static ua.com.ekka.devicetest.eth.ConnectivityReceiver.NETWORK_STATE_CHANGED;
-import static ua.com.ekka.devicetest.su.SuCommandsHelper.CMD_IPERF;
 import static ua.com.ekka.devicetest.su.SuCommandsHelper.CMD_PING;
 
 import android.content.BroadcastReceiver;
@@ -264,50 +262,56 @@ public class TestEthernetActivity extends AppCompatActivity {
                 return;
             }
 
-            String iperfResult = SuCommandsHelper.executeCmdBlocking(String.format(CMD_IPERF, iperfServerIp));
-            if (iperfResult.isEmpty()                                           // probably current device cannot execute SuCommandsHelper.executeCmdBlocking() correctly
-                    || iperfResult.contains("Working Directory: null")          // probably iperf is absent in system
-                    || iperfResult.contains("Cannot run program \"iperf\"")) {  // probably iperf is absent in system
-                runOnUiThread(() -> {
-                    textViewTestResult.setText(getString(R.string.ethernet_test_successful_wo_iperf));
-                    buttonStop.performClick();
-                });
-                logger.warn("Ethernet tested successfully (only ping, iperf is absent)");
-                return;
-            }
-            int endIndex = iperfResult.lastIndexOf(" Mbits/sec");
-            int startIndex = iperfResult.lastIndexOf(" ", endIndex - 1);
-            Double bandwith = 0.0;
-            try {
-                String bandwithStr = iperfResult.substring(startIndex, endIndex);
-                bandwith = Double.parseDouble(bandwithStr);
-            } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
-                runOnUiThread(() -> {
-                    displayFailTestResult(String.format(getString(R.string.error_test_iperf)));
-                    buttonStop.performClick();
-                });
-                logger.error(String.format("Error of iperf test with server %s", iperfServerIp));
-                return;
-            }
-            if (bandwith < 80) {
-                Double bandwidthFinal = bandwith;
-                runOnUiThread(() -> {
-                    displayFailTestResult(String.format(getString(R.string.error_test_iperf_low_bandwidth), bandwidthFinal));
-                    buttonStop.performClick();
-                });
-                logger.error(String.format("Error of iperf test with server %s: bandwidth=%.1f", iperfServerIp, bandwidthFinal));
-                return;
-            }
-
-            if (Thread.currentThread().isInterrupted()) {
-                return;
-            }
-
             runOnUiThread(() -> {
-                textViewTestResult.setText(getString(R.string.ethernet_test_successful));
+                textViewTestResult.setText(String.format(getString(R.string.ethernet_ping_test_successful), pingIp));
                 buttonStop.performClick();
             });
-            logger.warn("Ethernet tested successfully (both ping and iperf)");
+            logger.warn("Ethernet ping successful");
+
+//            String iperfResult = SuCommandsHelper.executeCmdBlocking(String.format(CMD_IPERF, iperfServerIp));
+//            if (iperfResult.isEmpty()                                           // probably current device cannot execute SuCommandsHelper.executeCmdBlocking() correctly
+//                    || iperfResult.contains("Working Directory: null")          // probably iperf is absent in system
+//                    || iperfResult.contains("Cannot run program \"iperf\"")) {  // probably iperf is absent in system
+//                runOnUiThread(() -> {
+//                    textViewTestResult.setText(getString(R.string.ethernet_test_successful_wo_iperf));
+//                    buttonStop.performClick();
+//                });
+//                logger.warn("Ethernet tested successfully (only ping, iperf is absent)");
+//                return;
+//            }
+//            int endIndex = iperfResult.lastIndexOf(" Mbits/sec");
+//            int startIndex = iperfResult.lastIndexOf(" ", endIndex - 1);
+//            Double bandwith = 0.0;
+//            try {
+//                String bandwithStr = iperfResult.substring(startIndex, endIndex);
+//                bandwith = Double.parseDouble(bandwithStr);
+//            } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
+//                runOnUiThread(() -> {
+//                    displayFailTestResult(String.format(getString(R.string.error_test_iperf)));
+//                    buttonStop.performClick();
+//                });
+//                logger.error(String.format("Error of iperf test with server %s", iperfServerIp));
+//                return;
+//            }
+//            if (bandwith < 80) {
+//                Double bandwidthFinal = bandwith;
+//                runOnUiThread(() -> {
+//                    displayFailTestResult(String.format(getString(R.string.error_test_iperf_low_bandwidth), bandwidthFinal));
+//                    buttonStop.performClick();
+//                });
+//                logger.error(String.format("Error of iperf test with server %s: bandwidth=%.1f", iperfServerIp, bandwidthFinal));
+//                return;
+//            }
+//
+//            if (Thread.currentThread().isInterrupted()) {
+//                return;
+//            }
+//
+//            runOnUiThread(() -> {
+//                textViewTestResult.setText(getString(R.string.ethernet_test_successful));
+//                buttonStop.performClick();
+//            });
+//            logger.warn("Ethernet tested successfully (both ping and iperf)");
         });
         testingThread.start();
     }
