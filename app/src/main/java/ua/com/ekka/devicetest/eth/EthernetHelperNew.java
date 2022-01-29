@@ -5,9 +5,9 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 
 import org.apache.commons.net.util.SubnetUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 /**
@@ -17,8 +17,7 @@ import ua.com.ekka.devicetest.su.SuCommandsHelper;
  */
 public class EthernetHelperNew extends EthernetHelper {
 
-    public static final String TAG = EthernetHelperNew.class.getSimpleName();
-    private Logger logger = Log4jHelper.getLogger(TAG);
+    private Logger logger = LoggerFactory.getLogger(EthernetHelperNew.class);
 
     private static final String CMD_ETH_UP = "ip link set eth0 up";      // "ifconfig eth0 up" also works
     private static final String CMD_ETH_DOWN = "ip link set eth0 down";  // "ifconfig eth0 down" also works

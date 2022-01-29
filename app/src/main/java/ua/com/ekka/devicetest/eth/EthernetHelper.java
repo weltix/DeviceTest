@@ -5,9 +5,9 @@ import static ua.com.ekka.devicetest.MainActivity.PRODUCT_AOSP_DRONE2;
 import android.content.Context;
 import android.os.Build;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 /**
@@ -24,8 +24,7 @@ import ua.com.ekka.devicetest.su.SuCommandsHelper;
  */
 public class EthernetHelper {
 
-    public static final String TAG = EthernetHelper.class.getSimpleName();
-    private static Logger logger = Log4jHelper.getLogger(TAG);
+    private static Logger logger = LoggerFactory.getLogger(EthernetHelper.class);
 
     private Context mContext;
     public IP_Settings ipSettings = new IP_Settings();  // last received from system network parameters

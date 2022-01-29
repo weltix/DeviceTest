@@ -21,7 +21,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,13 +33,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.uart.UartWorker;
 
 public class TestComPortActivity extends AppCompatActivity {
 
-    private static final String TAG = TestComPortActivity.class.getSimpleName();
-    private Logger logger = Log4jHelper.getLogger(TAG);
+    private Logger logger = LoggerFactory.getLogger(TestComPortActivity.class);
 
     private CheckBox checkBoxBaudratesDirection;
     private TextView textViewTestStatus;

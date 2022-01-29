@@ -25,7 +25,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -36,7 +37,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ua.com.ekka.devicetest.eth.ConnectivityReceiver;
-import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 public class MainActivity extends AppCompatActivity {
@@ -141,10 +141,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         try {
-            Log.i(TAG, "onCreate(), create (org.apache.log4j.Logger) logger...");
-            logger = Log4jHelper.getLogger(TAG);  // here will be uncaught RuntimeException if WRITE_EXTERNAL_STORAGE permission not granted
+            Log.i(TAG, "onCreate(), create (org.slf4j.Logger) logger...");
+            logger = LoggerFactory.getLogger(MainActivity.class);  // here will be uncaught RuntimeException if WRITE_EXTERNAL_STORAGE permission not granted
         } catch (Exception e) {
-            Log.e(TAG, "Log4jHelper.getLogger()", e);
+            Log.e(TAG, "org.slf4j.LoggerFactory.getLogger()", e);
         }
         logger.info("onCreate(), screen size x:" + sizeScreen.x + ", y:" + sizeScreen.y);
 

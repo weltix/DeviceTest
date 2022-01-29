@@ -1,0 +1,5 @@
+1. Best logging system for Android (we use logback-android):
+    https://www.triology.de/en/blog-entries/slf4j-and-logback-android
+    https://github.com/schnatterer/logback-android-demo
+    https://tony19.github.io/logback-android/
+    https://logback.qos.ch/manual/configuration.html

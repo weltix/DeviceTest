@@ -21,15 +21,14 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 public class TestTouchScreenActivity extends AppCompatActivity {
 
-    private static final String TAG = TestTouchScreenActivity.class.getSimpleName();
-    private Logger logger = Log4jHelper.getLogger(TAG);
+    private Logger logger = LoggerFactory.getLogger(TestTouchScreenActivity.class);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -6,14 +6,12 @@ import android.content.Intent;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 
-import org.apache.log4j.Logger;
-
-import ua.com.ekka.devicetest.log.Log4jHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConnectivityReceiver extends BroadcastReceiver {
 
-    private static final String TAG = ConnectivityReceiver.class.getSimpleName();
-    private Logger logger = Log4jHelper.getLogger(TAG);
+    private Logger logger = LoggerFactory.getLogger(ConnectivityReceiver.class);
 
     public static final String NETWORK_STATE_CHANGED = "ua.com.ekka.devicetest.NETWORK_STATE_CHANGED";
 

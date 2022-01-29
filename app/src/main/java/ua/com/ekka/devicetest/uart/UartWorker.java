@@ -8,7 +8,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.serialport.SerialPort;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ua.com.ekka.devicetest.log.Log4jHelper;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 /**
@@ -28,7 +28,7 @@ import ua.com.ekka.devicetest.su.SuCommandsHelper;
  */
 public class UartWorker {
 
-    Logger logger = Log4jHelper.getLogger(UartWorker.class.getName());
+    Logger logger = LoggerFactory.getLogger(UartWorker.class);
 
     public static final int EVENT_UART_OPEN = 0;
     public static final int EVENT_UART_CLOSED = 1;
