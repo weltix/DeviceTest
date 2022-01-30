@@ -12,6 +12,7 @@ import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -37,6 +38,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import ua.com.ekka.devicetest.eth.ConnectivityReceiver;
+import ua.com.ekka.devicetest.log.MyRollingFileAppender;
 import ua.com.ekka.devicetest.su.SuCommandsHelper;
 
 public class MainActivity extends AppCompatActivity {
@@ -142,10 +144,12 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             Log.i(TAG, "onCreate(), create (org.slf4j.Logger) logger...");
-            logger = LoggerFactory.getLogger(MainActivity.class);  // here will be uncaught RuntimeException if WRITE_EXTERNAL_STORAGE permission not granted
+            logger = LoggerFactory.getLogger(MainActivity.class);
         } catch (Exception e) {
             Log.e(TAG, "org.slf4j.LoggerFactory.getLogger()", e);
         }
+        String androidID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        MyRollingFileAppender.logSystemInfo(androidID);  // system info will be logged at every app launching (not only at start of every log file).
         logger.info("onCreate(), screen size x:" + sizeScreen.x + ", y:" + sizeScreen.y);
 
         connectivityReceiver = new ConnectivityReceiver();
@@ -170,10 +174,15 @@ public class MainActivity extends AppCompatActivity {
         buttonTestEthernet.setOnClickListener(buttonClickListener);
         buttonRebootToBootloader.setOnClickListener(buttonClickListener);
         buttonExitApp.setOnClickListener(buttonClickListener);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         DateFormat dateFormat0 = new SimpleDateFormat("dd.MM.yyyy HH:mm", new Locale("uk"));
         DateFormat dateFormat1 = new SimpleDateFormat("dd.MM.yyyy HH mm", new Locale("uk"));
         startClock(dateFormat0, dateFormat1);
+        logger.info("onStart()");
     }
 
     @Override
@@ -183,15 +192,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (clockTimer != null) {
+            clockTimer.cancel();
+            clockTimer = null;
+        }
+        logger.info("onStop()");
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         logger.info("onDestroy()");
         if (connectivityReceiver != null)
             unregisterReceiver(connectivityReceiver);
-        if (clockTimer != null) {
-            clockTimer.cancel();
-            clockTimer = null;
-        }
     }
 
     @Override
@@ -208,10 +223,10 @@ public class MainActivity extends AppCompatActivity {
         boolean isIntentSafe = activities.size() > 0;
         if (isIntentSafe) {
             startActivity(intent);
-            System.exit(0);
         } else {
             logger.warn("Try but fails to launch package com.resonance.cashdisplay, because it is absent in system");
         }
+        System.exit(0);
     }
 
     /**

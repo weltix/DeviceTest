@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+
+    <property name="LOG_PATH" value="./logs"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%.2thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ua.com.ekka.respos_web_monitor.log.MyRollingFileAppender">
+        <file>${LOG_PATH}/app.log</file>
+        <append>true</append>
+        <!-- set immediateFlush to false for much higher logging throughput -->
+        <immediateFlush>true</immediateFlush>
+        <!-- encoders are assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%.2thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/archived/app.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- each archived file -->
+            <maxFileSize>50Mb</maxFileSize>
+            <!-- total size of all archive files, if total size > , it will delete old archived file -->
+            <totalSizeCap>5GB</totalSizeCap>
+            <!-- days to keep -->
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="com.mchange.v2" level="warn"/>
+    <logger name="io.netty" level="warn"/>
+    <logger name="io.vertx" level="info"/>
+    <logger name="org.flywaydb" level="info"/>
+
+    <root level="debug">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>

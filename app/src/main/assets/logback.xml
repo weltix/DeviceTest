@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+
+    <property name="APP_PACKAGE" value="${PACKAGE_NAME}" />  <!-- special property, from AndroidManifest.xml, not used here  -->
+    <property name="APP_VERSION" value="${VERSION_NAME}" />  <!-- special property, from AndroidManifest.xml, not used here  -->
+    <property name="APP_BUILD" value="${VERSION_CODE}" />    <!-- special property, from AndroidManifest.xml, not used here  -->
+    <property name="APP_NAME" value="DeviceTest" />
+    <property name="LOG_PATH" value= "${EXT_DIR}/logs/${APP_NAME}" />  <!-- if external storage (SD) not mounted then usually EXT_DIR = /storage/emulated/0  -->
+
+    <appender name="logcat" class="ch.qos.logback.classic.android.LogcatAppender">
+        <tagEncoder>
+            <pattern>%logger{12}</pattern>
+        </tagEncoder>
+        <encoder>
+            <pattern>[%thread] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ua.com.ekka.devicetest.log.MyRollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <append>true</append>                    <!-- this is default value, but we set it explicitly yet -->
+        <immediateFlush>true</immediateFlush>    <!-- set immediateFlush to false for much higher logging throughput -->
+        <encoder>  <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+            <pattern>%d{HH:mm:ss.SSS} [%.4thread] %-5level %logger{12} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/archived/${APP_NAME}_%d{dd-MM-yyyy}.%i.log.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>      <!-- each file before archiving -->
+            <totalSizeCap>500MB</totalSizeCap>   <!-- max total size of all archive files; if real size > this size, then excessive most old archive files deleted -->
+            <maxHistory>90</maxHistory>          <!-- days to keep -->
+        </rollingPolicy>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="logcat"/>
+        <appender-ref ref="file"/>
+    </root>
+</configuration>
